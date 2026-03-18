@@ -702,4 +702,268 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ---- 8. Interactive Gramophone Logic ----
+    const tonearm = document.getElementById('tonearm');
+    const vinyl = document.getElementById('active-vinyl');
+    const platterBase = document.querySelector('.gramophone-3d-base');
+    const gramoStage = document.querySelector('.gramo-stage');
+    const wannaListen = document.querySelector('.wanna-listen');
+    const recordName = document.getElementById('record-name');
+    const nextBtn = document.getElementById('next-record');
+    const prevBtn = document.getElementById('prev-record');
+
+    if (tonearm && typeof gsap !== 'undefined' && typeof Draggable !== 'undefined') {
+        gsap.registerPlugin(Draggable);
+
+        let isPlaying = false;
+        let isReady = false; // Needle on record but not yet 'pressed'
+        let currentRecordIndex = 0;
+        
+        // Global Audio Object
+        const audio = new Audio();
+        audio.volume = 0.5;
+
+        const records = [
+            { 
+                name: 'MIDNIGHT CITY', 
+                artist: 'M83', 
+                color: '#c8b6ff', 
+                file: 'asset/audio/Midnight City.mp3' 
+            },
+            { 
+                name: 'ARIA-MATH', 
+                artist: 'C418', 
+                color: '#ffb5a7', 
+                file: 'asset/audio/ARIA-MATH.mp3' 
+            },
+            { 
+                name: 'WALTZ NO. 2', 
+                artist: 'SHOSTAKOVICH', 
+                color: '#c1d3fe', 
+                file: 'asset/audio/Waltz No. 2.mp3' 
+            }
+        ];
+
+        // Interaction Hint - Inject safely
+        const vinylHint = document.createElement('div');
+        vinylHint.className = 'vinyl-play-hint';
+        vinylHint.innerText = 'Click to Play';
+        if (platterBase) platterBase.appendChild(vinylHint);
+
+        // Premium 3D Mouse Tilt
+        const wrap = document.querySelector('.gramophone-wrap');
+        platterBase.addEventListener('mousemove', (e) => {
+            const rect = platterBase.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            
+            gsap.to(wrap, {
+                rotateY: x * 15,
+                rotateX: -y * 15 + 10,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        });
+
+        platterBase.addEventListener('mouseleave', () => {
+            gsap.to(wrap, {
+                rotateY: -8,
+                rotateX: 15,
+                duration: 1,
+                ease: "power2.out"
+            });
+            gsap.to(tonearm, { rotation: 150, duration: 0.5 });
+        });
+
+        platterBase.addEventListener('mouseenter', () => {
+            if (!isPlaying && !isReady) {
+                gsap.to(tonearm, { 
+                    rotation: 145, 
+                    duration: 0.15, 
+                    yoyo: true, 
+                    repeat: 3, 
+                    ease: "sine.inOut" 
+                });
+            }
+        });
+
+        // Tonearm Draggable logic
+        Draggable.create(tonearm, {
+            type: "rotation",
+            bounds: { minRotation: 40, maxRotation: 180 },
+            onDrag: function() {
+                checkReadyState(this.rotation);
+            },
+            onThrowUpdate: function() {
+                checkReadyState(this.rotation);
+            },
+            inertia: true,
+            snap: function(endValue) {
+                // If close to 'ready' (over the CD), snap to play position
+                if (endValue >= 110) return 140;
+                // Otherwise snap back to rest corner
+                return 60;
+            },
+            onRelease: function() {
+                checkReadyState(this.rotation);
+            }
+        });
+
+        function checkReadyState(rot) {
+            // High-fidelity alignment: 110-180deg is the "active" zone over the platter
+            if (rot >= 110) {
+                if (!isReady) {
+                    isReady = true;
+                    if (platterBase) platterBase.classList.add('active-drop-glow');
+                    const neoring = document.querySelector('.neoring');
+                    if (neoring) gsap.to(neoring, { opacity: 0.8, duration: 0.3, scale: 1.05 });
+                    if (vinyl) vinyl.style.cursor = 'pointer';
+                    
+                    // Update Hints
+                    if (wannaListen) wannaListen.innerText = "CLICK ON CD";
+                    if (vinylHint) {
+                        gsap.to(vinylHint, { opacity: 1, duration: 0.3 });
+                        vinylHint.innerText = 'PLAY';
+                    }
+                }
+            } else {
+                if (isReady || isPlaying) {
+                    if (isPlaying) stopPlayback();
+                    isReady = false;
+                    if (platterBase) platterBase.classList.remove('active-drop-glow');
+                    const neoring = document.querySelector('.neoring');
+                    if (neoring) gsap.to(neoring, { opacity: 0.1, duration: 0.3, scale: 1 });
+                    if (vinyl) vinyl.style.cursor = 'default';
+                    
+                    // Reset Hints
+                    if (wannaListen) wannaListen.innerText = "Wanna listen?? put the pin";
+                    if (vinylHint) gsap.to(vinylHint, { opacity: 0, duration: 0.3 });
+                }
+            }
+        }
+
+        // The "Press to Start" interaction
+        vinyl.addEventListener('click', () => {
+            if (isReady && !isPlaying) {
+                startPlayback();
+            } else if (isPlaying) {
+                stopPlayback();
+            }
+        });
+
+        function startPlayback() {
+            if (isPlaying) return;
+            
+            isPlaying = true;
+            if (platterBase) platterBase.classList.add('is-spinning');
+            if (gramoStage) gramoStage.classList.add('playback-active');
+            
+            // Set source and play
+            audio.src = records[currentRecordIndex].file;
+            
+            audio.play()
+                .then(() => {
+                    console.log("Gramophone: Playing " + records[currentRecordIndex].name);
+                    gsap.to('.vinyl-play-hint', { opacity: 0, duration: 0.3 });
+                })
+                .catch(e => {
+                    console.error("Gramophone: Error", e);
+                    // Visual error feedback
+                    isPlaying = false;
+                    platterBase.classList.remove('is-spinning');
+                    vinylHint.innerText = 'File Not Found';
+                    gsap.to('.vinyl-play-hint', { opacity: 1, duration: 0.3 });
+                });
+            
+            gsap.to(vinyl, { scale: 0.98, duration: 0.1, yoyo: true, repeat: 1 });
+        }
+
+        function stopPlayback() {
+            if (!isPlaying) return;
+            
+            isPlaying = false;
+            if (platterBase) platterBase.classList.remove('is-spinning');
+            if (gramoStage) gramoStage.classList.remove('playback-active');
+            
+            audio.pause();
+            
+            if (vinylHint) {
+                vinylHint.innerText = 'PLAY';
+                if (isReady) gsap.to(vinylHint, { opacity: 1, duration: 0.3 });
+            }
+        }
+
+        // Record Switching Logic
+        function updateRecord(index) {
+            currentRecordIndex = index;
+            const data = records[index];
+
+            // Preload the audio file
+            audio.src = data.file;
+            audio.load();
+
+            // Animate local UI
+            const label = document.querySelector('.vinyl-label');
+            if (label) {
+                gsap.to(label, {
+                    backgroundColor: data.color,
+                    duration: 0.4,
+                    ease: "power2.out"
+                });
+            }
+            
+            if (recordName) recordName.innerText = data.name + ".BIN";
+            // Update subtitle to show artist
+            const subtitle = document.querySelector('.vinyl-title');
+            if (subtitle) subtitle.innerText = data.artist || "SYSTEM PLAYBACK";
+
+            // Update neon colors & dynamic ambient glow
+            document.documentElement.style.setProperty('--accent-3', data.color);
+            document.documentElement.style.setProperty('--ambient-glow', data.color);
+
+            // Update vinyl border color to match song
+            if (vinyl) vinyl.style.borderColor = data.color;
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const nextIndex = (currentRecordIndex + 1) % records.length;
+                
+                gsap.to(vinyl, {
+                    rotate: 20,
+                    x: 150,
+                    opacity: 0,
+                    duration: 0.4,
+                    ease: "power2.in",
+                    onComplete: () => {
+                        if (isPlaying) stopPlayback();
+                        updateRecord(nextIndex);
+                        gsap.fromTo(vinyl, { x: -150, rotate: -20, opacity: 0 }, { x: 0, rotate: 0, opacity: 1, duration: 0.4, ease: "power2.out" });
+                    }
+                });
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                const prevIndex = (currentRecordIndex - 1 + records.length) % records.length;
+                
+                gsap.to(vinyl, {
+                    rotate: -20,
+                    x: -150,
+                    opacity: 0,
+                    duration: 0.4,
+                    ease: "power2.in",
+                    onComplete: () => {
+                        if (isPlaying) stopPlayback();
+                        updateRecord(prevIndex);
+                        gsap.fromTo(vinyl, { x: 150, rotate: 20, opacity: 0 }, { x: 0, rotate: 0, opacity: 1, duration: 0.4, ease: "power2.out" });
+                    }
+                });
+            });
+        }
+    }
+
+
 });
+

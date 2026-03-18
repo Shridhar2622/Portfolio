@@ -6,7 +6,7 @@
   <title>Cute Minimal Portfolio ✨</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Icon Libraries -->
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -285,14 +285,81 @@
 
     <!-- Contact Section -->
     <section id="contact" class="contact hidden">
-      <h2>Say Hello <i class='bx bx-message-square-dots'></i></h2>
-      <div class="contact-card card form-card">
-        <form class="contact-form">
-          <input type="text" placeholder="Your Name" required>
-          <input type="email" placeholder="Your Email" required>
-          <textarea placeholder="Your Message..." rows="5" required></textarea>
-          <button type="submit" class="btn submit-btn" style="width: 100%;">Send Message <i class='bx bx-send'></i></button>
-        </form>
+      <div class="wrapper">
+        <div class="contact-header">
+            <h2>Say Hello <i class='bx bx-message-square-dots'></i></h2>
+            <div class="header-line"></div>
+        </div>
+        <div class="contact-grid">
+            <!-- Gramophone Column -->
+            <div class="gramo-side">
+                <div class="gramo-stage">
+                    <button class="gramo-btn side-nav prev" id="prev-record" title="Previous Track">
+                        <i class='bx bx-chevron-left'></i>
+                    </button>
+                    
+                    <div class="gramophone-wrap">
+                        <div class="wanna-listen">Wanna listen?? put the pin</div>
+                        <div class="gramophone-3d-base">
+                            <div class="base-top"></div>
+                            <div class="base-side"></div>
+                            
+                            <!-- Corner Pins (Decorative/Mechanical) -->
+                            <div class="corner-pin tp-l"></div>
+                            <div class="corner-pin tp-r"></div>
+                            <div class="corner-pin bt-l"></div>
+                            <div class="corner-pin bt-r"></div>
+
+                            <div class="turntable-deck">
+                                <div class="platter">
+                                    <div class="neoring"></div>
+                                    <div class="vinyl-record" id="active-vinyl" title="Place pin, then click to play!">
+                                        <div class="vinyl-lines"></div>
+                                        <div class="vinyl-binary-overlay">
+                                            <span class="bin-code tech-1">1011011010111</span>
+                                            <span class="bin-code tech-2">10101</span>
+                                            <span class="bin-code tech-3">0111010111</span>
+                                            <span class="bin-code tech-4">1010101111</span>
+                                        </div>
+                                        <div class="vinyl-label">
+                                            <span class="vinyl-title">SYSTEM PLAYBACK</span>
+                                            <span class="vinyl-subtitle" id="record-name">LOFI_BEATS.BIN</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- High-Tech Tonearm Assembly -->
+                            <div class="tonearm-pivot-assembly">
+                                <div class="pivot-base"></div>
+                                <div class="tonearm" id="tonearm">
+                                    <div class="tonearm-rod-main"></div>
+                                    <div class="tonearm-joint"></div>
+                                    <div class="tonearm-stylus-head">
+                                        <div class="needle-tip"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- end gramophone-wrap -->
+
+                    <button class="gramo-btn side-nav next" id="next-record" title="Next Track">
+                        <i class='bx bx-chevron-right'></i>
+                    </button>
+                </div> <!-- end gramo-stage -->
+            </div> <!-- end gramo-side -->
+
+            <!-- Form Column -->
+            <div class="form-side">
+                <div class="contact-card card form-card">
+                    <form action="#" class="contact-form">
+                        <input type="text" placeholder="Your Name" required>
+                        <input type="email" placeholder="Your Email" required>
+                        <textarea placeholder="Your Message..." rows="5" required></textarea>
+                        <button type="submit" class="btn submit-btn" style="width: 100%;">Send Message <i class='bx bx-send'></i></button>
+                    </form>
+                </div>
+            </div>
+        </div> <!-- end contact-grid -->
       </div>
     </section>
   </main>
@@ -305,6 +372,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script src="script.js?v=4"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
