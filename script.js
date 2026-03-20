@@ -1,23 +1,71 @@
+// ---- 0. Global Context State ----
+window.siteStartTime = Date.now();
+window.isPlayingBreakout = false;
+window.isAudioPlaying = false;
+window.currentAudioTrackName = "";
+
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ---- 1. Initialize Particles.js ----
+    if (typeof particlesJS !== "undefined") {
+        particlesJS.load('particles-js', 'asset/particles.json', function() {
+            console.log('particles.js loaded');
+        });
+    }
 
     // ---- 2. GSAP Enhanced Animations ----
     if (typeof gsap !== "undefined" && typeof ScrollTrigger !== "undefined") {
         gsap.registerPlugin(ScrollTrigger);
 
-        // 2a. Initial Hero Load Timeline (Staggered Intro)
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-        
-        // Ensure nav drops down
-        tl.fromTo(".navbar", 
+        // 2a. Masked Cinematic Intro (GTA Style)
+        const mainTl = gsap.timeline();
+        const welcomeText = "WELCOME";
+        const maskText = document.getElementById('welcome-svg-text');
+
+        // Initial setup
+        gsap.set(".intro-overlay", { opacity: 1, display: "flex" });
+        gsap.set(".navbar", { autoAlpha: 0 });
+        if(maskText) maskText.textContent = "";
+
+        // 1. Typing Effect (Inside the SVG mask)
+        mainTl.to({}, {
+            duration: 0.8,
+            ease: "none",
+            onUpdate: function() {
+                const prog = this.progress();
+                const count = Math.ceil(prog * welcomeText.length);
+                if(maskText) maskText.textContent = welcomeText.slice(0, count);
+            }
+        });
+
+        // 2. Pause and then GTA Cinematic Reveal
+        // The text is a hole in the black overlay. Scaling it up reveals the site.
+        mainTl.to(maskText, {
+            scale: 150, // Massive scale to clear the screen
+            transformOrigin: "50% 50%",
+            duration: 1.2,
+            ease: "expo.in"
+        }, "+=0.3")
+        .to(".intro-svg", {
+            autoAlpha: 0,
+            duration: 0.4,
+            ease: "none"
+        }, "-=0.2")
+        .set(".intro-overlay", { display: "none" }); // Ensure it stops blocking clicks
+
+        // 3. Reveal Navbar and Rest of Site
+        mainTl.fromTo(".navbar", 
             { y: -50, autoAlpha: 0 }, 
-            { y: 0, autoAlpha: 1, duration: 1 }
-        )
+            { y: 0, autoAlpha: 1, duration: 0.8 },
+            "-=0.2"
+        );
+
         // Stagger hero elements popping up
         const heroElements = document.querySelectorAll('.hero-title, .hero-subtitle, .hero-desc, .hero-social-links, .hero-terminal');
         if (heroElements.length > 0) {
-            tl.fromTo(heroElements,
+            mainTl.fromTo(heroElements,
                 { y: 30, autoAlpha: 0 },
-                { y: 0, autoAlpha: 1, duration: 1, stagger: 0.15 },
+                { y: 0, autoAlpha: 1, duration: 0.8, stagger: 0.1 },
                 "-=0.5"
             );
         }
@@ -111,8 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 
                 tl.to(revealWrapper, { width: "100%", duration: 0.6, ease: "power3.inOut" }) // 1. Draw the horizontal line
-                  .to(aboutCard, { paddingBottom: 40, duration: 0.8, ease: "power3.inOut" }, "+=0") // 2. Add padding to bottom of card
-                  .to(revealWrapper, { height: "450px", duration: 0.8, ease: "power3.inOut" }, "<") // 3. Expand wrapper vertically
+                  .to(aboutCard, { paddingBottom: 85, duration: 0.8, ease: "power3.inOut" }, "+=0") // 2. Add padding to bottom of card
+                  .to(revealWrapper, { height: "350px", duration: 0.8, ease: "power3.inOut" }, "<") // 3. Expand wrapper vertically
                   .to(revealImg, { opacity: 1, filter: "grayscale(100%)", duration: 0.8, ease: "power2.out" }, "-=0.4"); // 4. Reveal photo (start grayscale)
             }
         });
@@ -286,6 +334,20 @@ document.addEventListener('DOMContentLoaded', () => {
         // Bricks (derived from the terminal text lines)
         let bricks = [];
         const termLines = Array.from(document.querySelectorAll('.terminal-content .term-line'));
+
+        function resizeGame() {
+            const container = gameCanvas.parentElement;
+            if (container) {
+                gameCanvas.width = container.clientWidth;
+                gameCanvas.height = 420; // Maintain consistent height
+            }
+            if (typeof drawGame === 'function') drawGame();
+        }
+        window.addEventListener('resize', () => {
+            resizeGame();
+            initBricks();
+        });
+        resizeGame();
         
         // Simple function to build the brick matrix
         function initBricks() {
@@ -328,6 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sideTerminal.addEventListener('mouseenter', () => {
             isHovering = true;
+            window.isPlayingBreakout = true;
             if(!gameLoop) {
                 lastTime = performance.now();
                 gameLoop = requestAnimationFrame(updateGame);
@@ -336,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sideTerminal.addEventListener('mouseleave', () => {
             isHovering = false;
+            window.isPlayingBreakout = false;
             cancelAnimationFrame(gameLoop);
             gameLoop = null;
         });
@@ -684,12 +748,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const distToMouse = Math.sqrt(dxMouse*dxMouse + dyMouse*dyMouse);
 
                 const timeSinceCustomMsg = Date.now() - data.customMessageTime;
+                const timeSpentSeconds = (Date.now() - window.siteStartTime) / 1000;
                 
                 // If flower is off, wait tiny bit before they speak and enter
                 let delayReturning = (!flowerActive && flowerOffTime > 0 && Date.now() - flowerOffTime < 300);
                 const isShowingCustomMsg = !delayReturning && timeSinceCustomMsg < 3500;
 
-                const bubbleContents = ["Bzz!", "Hi there!", "Cute cursor!", "What's this?", "Zzz...", "Follow you!"];
+                // Dynamic Context-Aware Bubble Contents
+                let bubbleContents = ["Bzz!", "Hi there!", "Cute cursor!", "What's this?", "Zzz...", "Follow you!", "Are you lost?", "I like your style!", "Nice coding!", "Just vibing."];
+
 
                 // 1. Determine interaction states and bubbles
                 if (flowerActive) {
@@ -808,6 +875,65 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+
+        // ---- Context-Aware Autonomous Bee Dialogue ----
+        setInterval(() => {
+            let message = null;
+            let timeSpentSeconds = (Date.now() - window.siteStartTime) / 1000;
+
+            if (window.isPlayingBreakout) {
+                let msgs = [
+                    "Go go go!", "Don't drop it!", "Nice hit!",
+                    "Can you beat the high score?", "I could do better...",
+                    "Focus!", "Break those bricks!", "Oooh close one!",
+                    "You're on fire!", "That was smooth!",
+                    "My wings are tired just watching."
+                ];
+                message = msgs[Math.floor(Math.random() * msgs.length)];
+            } else if (window.isAudioPlaying && window.currentAudioTrackName) {
+                const trackName = window.currentAudioTrackName.toUpperCase();
+                if (trackName.includes("ARIA")) {
+                    let msgs = [
+                        "I love this song!", "It reminds me of something...",
+                        "Minecraft vibes...", "So peaceful.",
+                        "This takes me back.", "I could listen forever.",
+                        "Building memories...", "The bees approve."
+                    ];
+                    message = msgs[Math.floor(Math.random() * msgs.length)];
+                } else if (trackName.includes("WALTZ")) {
+                    let msgs = [
+                        "So sad and beautiful...", "A masterpiece...",
+                        "Such elegance.", "Dancing in the dark.",
+                        "Shostakovich knew pain.", "Hauntingly gorgeous.",
+                        "I'm getting emotional.", "Art in its purest form."
+                    ];
+                    message = msgs[Math.floor(Math.random() * msgs.length)];
+                } else if (trackName.includes("MIDNIGHT")) {
+                    let msgs = [
+                        "Pure nostalgia...", "GTA V memories!",
+                        "Midnight drives...", "Classic synthpop!",
+                        "City lights and neon.", "I feel alive!",
+                        "Turn it up!", "This is a vibe."
+                    ];
+                    message = msgs[Math.floor(Math.random() * msgs.length)];
+                }
+            } else if (timeSpentSeconds > 60 && Math.random() > 0.5) {
+                let msgs = [
+                    "Still here?", "Go touch grass.",
+                    "Don't you have work to do?", "Just watching me fly?",
+                    "Zzz...", "You must really like this site.",
+                    "I'm running out of things to say.",
+                    "Hire him already!"
+                ];
+                message = msgs[Math.floor(Math.random() * msgs.length)];
+            }
+
+            if (message && !flowerActive) {
+                const randomBee = beeData[Math.floor(Math.random() * beeData.length)];
+                randomBee.customMessage = message;
+                randomBee.customMessageTime = Date.now();
+            }
+        }, 3500);
     }
 
     // ---- 7. Background Floating Icons Random Glow ----
@@ -1006,6 +1132,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isPlaying) return;
             
             isPlaying = true;
+            window.isAudioPlaying = true;
+            window.currentAudioTrackName = records[currentRecordIndex].name;
+            
             if (platterBase) platterBase.classList.add('is-spinning');
             if (gramoStage) gramoStage.classList.add('playback-active');
             
@@ -1033,6 +1162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isPlaying) return;
             
             isPlaying = false;
+            window.isAudioPlaying = false;
             if (platterBase) platterBase.classList.remove('is-spinning');
             if (gramoStage) gramoStage.classList.remove('playback-active');
             
@@ -1052,6 +1182,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Preload the audio file
             audio.src = data.file;
             audio.load();
+
+            // Start playing new track immediately if already playing
+            if (isPlaying) {
+                // Slight delay to simulate needle drop reset
+                setTimeout(() => {
+                    audio.src = data.file;
+                    window.currentAudioTrackName = data.name;
+                    audio.play().catch(e => console.error("Auto-play blocked", e));
+                }, 400);
+            }
 
             // Animate local UI
             const label = document.querySelector('.vinyl-label');
@@ -1121,132 +1261,187 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ---- 7. Project Journey Refined Logic (ScrollTrigger Pinning & Scaling) ----
 function initProjectJourney() {
-    const section = document.querySelector('.project-journey');
-    const container = document.querySelector('.journey-container');
-    const progressLine = document.querySelector('.progress-line');
-    const journeyVideo = document.getElementById('journey-video');
-    const projectItems = document.querySelectorAll('.project-item');
-    const journeyTitle = document.getElementById('journey-title');
-    const journeyDesc = document.getElementById('journey-desc');
+    const section = document.querySelector('.projects-journey');
+    const container = document.querySelector('.journey-pin-wrapper');
+    const progressBar = document.querySelector('.neon-progress-bar');
+    const slides = gsap.utils.toArray('.j-slide');
+    const navItems = gsap.utils.toArray('.j-nav-item');
 
-    if (!section || !container || !journeyVideo) return;
+    if (!section || !container || slides.length === 0) return;
 
-    const projectData = {
-        1: {
-            title: "Cozy Tracker",
-            video: "https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-921-large.mp4",
-            desc: "A minimal and cute web app designed to track your daily goals with satisfying micro-interactions and sounds. This project explores the intersection of productivity and aesthetic design."
-        },
-        2: {
-            title: "Cloud Notes",
-            video: "https://assets.mixkit.co/videos/preview/mixkit-set-of-keys-on-a-mixing-console-4424-large.mp4",
-            desc: "A visually soothing markdown editor that categorizes all your brilliant ideas and meticulous notes automatically. Built with a focus on typography and readability."
-        },
-        3: {
-            title: "Aesthetic Weather",
-            video: "https://assets.mixkit.co/videos/preview/mixkit-man-working-on-his-laptop-308-large.mp4",
-            desc: "A weather dashboard that constantly adapts its beautifully crafted pastel themes to the current climate data. It uses glassmorphism and real-time animations to provide a unique glance at the day's forecast."
-        }
-    };
-
-    // Main ScrollTrigger Timeline
+    // Create the pinned scrub timeline
     const tl = gsap.timeline({
         scrollTrigger: {
             trigger: section,
-            start: "top top",
-            end: "+=4000", 
-            pin: true,
-            scrub: 1,
+            start: "center center", // Centers perfectly since section is exactly 100vh
+            end: "+=3000", // Slightly longer scroll duration
+            pin: true, // Pin the ENTIRE section to prevent next-section overlap
+            scrub: 1, // Smooth scrub
+            anticipatePin: 1, // Helps prevent snapping on entry
+            onUpdate: (self) => {
+                // Active dot perfectly syncs with the physical neon line
+                // Base timeline is 2.0s, Buffer is 0.5s. Total = 2.5s.
+                // 100% line happens at 2.0 / 2.5 = 0.8 progress.
+                // 50% line happens at 1.0 / 2.5 = 0.4 progress.
+                let activeIndex = 0;
+                if (self.progress >= 0.8) {
+                    activeIndex = 2; // Reach 3rd dot exactly at end of line drawing
+                } else if (self.progress >= 0.4) {
+                    activeIndex = 1; // Reach 2nd dot when line is 50%
+                }
+                
+                navItems.forEach((item, idx) => {
+                    // Keep the dot active if the line has passed it (idx <= activeIndex)
+                    item.classList.toggle('active', idx <= activeIndex);
+                });
+            }
         }
     });
 
-    // 1. Initial Opacity fade-in Only (No Scale)
-    tl.to(container, {
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out"
-    });
-
-    // 2. Animate the progress line height from start to finish
-    // This runs in parallel with the content transitions
-    tl.to(progressLine, {
+    // 1. Neon progress bar fills from 0 to 100% over the whole timeline
+    tl.to(progressBar, {
         height: "100%",
         ease: "none",
-        duration: 3 // Total length of the timeline's main content parts
-    }, 0.5);
+        duration: slides.length - 1
+    }, 0);
 
-    // 3. Project 1 Delay
-    tl.to({}, { duration: 0.8 }); 
+    // 2. Crossfade Slide transitions
+    slides.forEach((slide, i) => {
+        // Initial setup to ensure consistency
+        if (i === 0) {
+            gsap.set(slide, { zIndex: 10, pointerEvents: "auto", opacity: 1, autoAlpha: 1 });
+        } else {
+            gsap.set(slide, { zIndex: 1, pointerEvents: "none", opacity: 0, autoAlpha: 0 });
+        }
 
-    // 4. Transition to Project 2 (at around 1/3 of the height)
-    tl.to(container, {
-        opacity: 0,
-        y: 20,
-        duration: 0.4,
-        onComplete: () => updateProjectContent(2)
+        if (i !== 0) {
+            const prevSlide = slides[i - 1];
+            
+            // Fade out old slide (drifting up slightly)
+            // Starts halfway through the scroll distance to the next project
+            tl.to(prevSlide, {
+                opacity: 0,
+                autoAlpha: 0,
+                y: -40,
+                zIndex: 1,
+                pointerEvents: "none",
+                duration: 0.5,
+                ease: "power2.inOut"
+            }, i - 0.5);
+            
+            // Fade in new slide (drifting up into place)
+            // Starts halfway through the scroll distance to the next project
+            tl.fromTo(slide, 
+                { opacity: 0, autoAlpha: 0, y: 40, zIndex: 1, pointerEvents: "none" },
+                { 
+                    opacity: 1, 
+                    autoAlpha: 1, 
+                    y: 0, 
+                    zIndex: 10, 
+                    pointerEvents: "auto", 
+                    duration: 0.5, 
+                    ease: "power2.inOut" 
+                },
+                i - 0.5 // Reveal exactly between current dot and next dot
+            );
+        }
     });
-    tl.to(container, {
-        opacity: 1,
-        y: 0,
-        duration: 0.4
-    });
-    tl.to({}, { duration: 0.8 }); 
 
-    // 5. Transition to Project 3 (at around 2/3 of the height)
-    tl.to(container, {
-        opacity: 0,
-        y: 20,
-        duration: 0.4,
-        onComplete: () => updateProjectContent(3)
-    });
-    tl.to(container, {
-        opacity: 1,
-        y: 0,
-        duration: 0.4
-    });
-    tl.to({}, { duration: 0.8 }); 
-
-    // Helper to update content
-    function updateProjectContent(id) {
-        const data = projectData[id];
-        if (!data) return;
-
-        // Update active sidebar item
-        projectItems.forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('data-project') == id) {
-                item.classList.add('active');
-            }
+    // 3. Add click listeners for navigation items to scroll to slide
+    navItems.forEach((item, i) => {
+        item.addEventListener('click', () => {
+            const start = tl.scrollTrigger.start;
+            const end = tl.scrollTrigger.end;
+            const total = end - start;
+            // Calculate progress for slide i. Slides start at 0 and end at duration slides.length-1
+            // Adding a tiny offset to ensure we land inside the reveal zone
+            const progress = i / (slides.length - 1);
+            const scrollTo = start + (total * progress);
+            
+            gsap.to(window, {
+                scrollTo: scrollTo,
+                duration: 1.2,
+                ease: "power2.inOut"
+            });
         });
-
-        // Update Text and Video with a subtle fade
-        gsap.to([journeyTitle, journeyDesc, journeyVideo], {
-            opacity: 0,
-            duration: 0.2,
-            onComplete: () => {
-                journeyTitle.innerText = data.title;
-                journeyDesc.innerText = data.desc;
-                journeyVideo.querySelector('source').src = data.video;
-                journeyVideo.load();
-                journeyVideo.play().catch(e => {});
-                
-                gsap.to([journeyTitle, journeyDesc, journeyVideo], {
-                    opacity: 1,
-                    duration: 0.4
-                });
-            }
-        });
-    }
-
-    // Hover-to-play enhancement
-    const videoWrapper = document.querySelector('.video-wrapper');
-    videoWrapper.addEventListener('mouseenter', () => {
-        journeyVideo.play().catch(e => {});
+        
+        // Horizontal hover effect on title
+        item.style.cursor = 'pointer';
     });
-    videoWrapper.addEventListener('mouseleave', () => {
-        journeyVideo.pause();
-    });
+
+    // 4. Add a small buffer at the end so scrub has time to catch up before unpinning
+    tl.to({}, { duration: 0.5 });
 }
 
 // Call the init function
 initProjectJourney();
+
+// ---- 9. Project Details Toggle Logic ----
+function initProjectDetailsToggle() {
+    const detailButtons = document.querySelectorAll('.more-details-btn');
+    
+    detailButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Avoid triggering any other scroll events if necessary
+            const slide = btn.closest('.j-slide');
+            if (slide) {
+                const isExpanded = slide.classList.toggle('is-expanded');
+                
+                // Update button text while preserving the icon
+                const textNode = btn.querySelector('span');
+                if (textNode) {
+                    textNode.textContent = isExpanded ? " Less Details " : " More Details ";
+                }
+            }
+        });
+    });
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    initProjectDetailsToggle();
+
+    // ---- Certificate Lightbox ----
+    const certLightbox = document.getElementById('cert-lightbox');
+    const certIframe = document.getElementById('cert-lightbox-iframe');
+    const certCloseBtn = document.getElementById('cert-lightbox-close');
+    const certCards = document.querySelectorAll('.cert-card');
+
+    function openCertLightbox(pdfUrl) {
+        if (!certLightbox || !certIframe) return;
+        certIframe.src = pdfUrl;
+        certLightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCertLightbox() {
+        if (!certLightbox || !certIframe) return;
+        certLightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        // Delay clearing src to let fade-out finish
+        setTimeout(() => { certIframe.src = ''; }, 400);
+    }
+
+    certCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const pdfUrl = card.getAttribute('data-pdf');
+            if (pdfUrl) openCertLightbox(pdfUrl);
+        });
+    });
+
+    if (certCloseBtn) {
+        certCloseBtn.addEventListener('click', closeCertLightbox);
+    }
+
+    if (certLightbox) {
+        certLightbox.addEventListener('click', (e) => {
+            if (e.target === certLightbox) closeCertLightbox();
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && certLightbox?.classList.contains('active')) {
+            closeCertLightbox();
+        }
+    });
+});

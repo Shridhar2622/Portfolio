@@ -29,9 +29,29 @@
 </head>
 
 <body>
+  <!-- Intro Overlay -->
+  <div id="intro-overlay" class="intro-overlay">
+    <svg class="intro-svg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <mask id="welcome-mask">
+          <rect width="100%" height="100%" fill="white" />
+          <text id="welcome-svg-text" x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" fill="black" font-weight="950" font-size="80" letter-spacing="8"></text>
+        </mask>
+      </defs>
+      <rect width="100%" height="100%" fill="black" mask="url(#welcome-mask)" />
+    </svg>
+  </div>
+
   <!-- Navigation -->
   <nav class="navbar hidden">
-    <div class="logo"><i class='bx bx-planet' style='color: var(--accent-3);'></i> minimal.</div>
+    <div class="logo">
+        <span class="logo-icon"><i class='bx bx-planet' style='color: var(--accent-3);'></i></span>
+        <a href="#hero" class="logo-text">
+            <span>S</span><span class="logo-reveal">hridhar</span>
+            <span class="logo-reveal">&nbsp;</span>
+            <span>P</span><span class="logo-reveal">andey</span>
+        </a>
+    </div>
     <ul class="nav-links">
       <li><a href="#hero">home</a></li>
       <li><a href="#about">about</a></li>
@@ -155,7 +175,7 @@
     <!-- Skills Section -->
     <section id="skills" class="skills hidden">
         <h2>My Skills <i class='bx bx-layer'></i></h2>
-        <p style="text-align: center; margin-top: -10px; margin-bottom: 30px;">Hover to drop interactive glowing skill badges! <i class='bx bx-cloud-drizzle'></i></p>
+        
         <div class="skills-grid wrapper">
             
             <!-- Frontend Card -->
@@ -183,16 +203,16 @@
                 <h3>Backend <i class='bx bx-server'></i></h3>
                 <div class="skills-text-container">
                     <span class="skill-text">Node.js</span>
-                    <span class="skill-text">Python</span>
+                   
                     <span class="skill-text">Express</span>
-                    <span class="skill-text">Django</span>
+                  
                     <span class="skill-text">REST APIs</span>
                 </div>
                 <div class="skills-physics-container">
                     <div class="physics-icon physics-visible" data-color="#f08080"><i class="devicon-nodejs-plain"></i></div>
-                    <div class="physics-icon physics-visible" data-color="#c1d3fe"><i class="devicon-python-plain"></i></div>
+                    
                     <div class="physics-icon physics-visible" data-color="#c8b6ff"><i class="devicon-express-original"></i></div>
-                    <div class="physics-icon physics-visible" data-color="#a2d2ff"><i class="devicon-django-plain"></i></div>
+                    
                     <div class="physics-icon physics-visible" data-color="#cdb4db"><i class='bx bx-transfer'></i></div>
                 </div>
             </div>
@@ -273,89 +293,291 @@
     </section>
 
 
-    <!-- Project Journey Section -->
-    <section id="project-journey" class="project-journey scroll-section">
-      <h2 class="section-title">Project Journey <i class='bx bx-map-alt'></i></h2>
-      <div class="journey-container card">
-        <div class="journey-sidebar">
-          <div class="sidebar-line"></div>
-          <div class="progress-line"></div>
-          <ul class="project-list">
-            <li class="project-item active" data-project="1">
-              <span class="project-dot"></span>
-              <span class="project-name">Project 01</span>
-              <i class='bx bx-right-arrow-alt project-arrow'></i>
-            </li>
-            <li class="project-item" data-project="2">
-              <span class="project-dot"></span>
-              <span class="project-name">Project 02</span>
-              <i class='bx bx-right-arrow-alt project-arrow'></i>
-            </li>
-            <li class="project-item" data-project="3">
-              <span class="project-dot"></span>
-              <span class="project-name">Project 03</span>
-              <i class='bx bx-right-arrow-alt project-arrow'></i>
-            </li>
-          </ul>
-        </div>
-        
-        <div class="journey-content">
-          <div class="video-wrapper">
-            <video id="journey-video" loop muted playsinline poster="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80">
-              <source src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-921-large.mp4" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
-            <div class="video-overlay">
-              <i class='bx bx-play-circle'></i>
+    <!-- Projects Section (Interactive Journey) -->
+    <section id="projects" class="projects-journey">
+      
+      <div class="journey-pin-wrapper">
+        <div class="journey-content-wrap">
+          <h2 class="section-title">Projects <i class='bx bx-briefcase'></i></h2>
+          <div class="journey-split-layout card">
+          
+          <!-- Left Sidebar: Neon Progress & Nav -->
+          <div class="journey-left-nav">
+            <ul class="journey-nav-list">
+              <!-- Track inside list ensures exact height match -->
+              <div class="neon-track-vertical">
+                <div class="neon-progress-bar"></div>
+              </div>
+              
+              <li class="j-nav-item active">
+                <span class="j-dot"></span>
+                <span class="j-name">Reservice</span>
+              </li>
+              <li class="j-nav-item">
+                <span class="j-dot"></span>
+                <span class="j-name">Telemedicine</span>
+              </li>
+              <li class="j-nav-item">
+                <span class="j-dot"></span>
+                <span class="j-name">Doodle Dash</span>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Right Content: Images & Descriptions -->
+          <div class="journey-right-content">
+            <div class="journey-slides-container">
+              
+              <!-- Project 1: Reservice -->
+              <div class="j-slide slide-1">
+                <span class="j-project-number">01</span>
+                <div class="j-img-wrapper">
+                  <img src="asset/Projects/Reservice.png" alt="Reservice Platform">
+                  <div class="j-img-overlay"></div>
+                </div>
+                <div class="j-details">
+                  <div class="j-header">
+                    <h3>Reservice</h3>
+                    <div class="j-header-right">
+                      <div class="j-status status-live"><span class="status-dot"></span> Live</div>
+                      <div class="j-links">
+                        <a href="https://github.com/Shridhar2622/PEPFINAL" target="_blank" title="GitHub Repository"><i class='bx bxl-github'></i></a>
+                        <a href="https://reservice.in/" target="_blank" title="Live Site"><i class='bx bx-link-external'></i></a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="j-tech-badges">
+                    <span class="tech-badge">React</span>
+                    <span class="tech-badge">Node.js</span>
+                    <span class="tech-badge">MongoDB</span>
+                    <span class="tech-badge">Express</span>
+                  </div>
+                  <p class="j-summary">A full-stack service reservation platform connecting users with verified technicians. Features real-time booking, service tracking, and verified professional profiles to ensure trust and reliability.</p>
+                  
+                  <button class="more-details-btn"><span> More Details </span><i class='bx bx-chevron-down'></i></button>
+                  
+                  <div class="details-expanded">
+                    <ul class="j-features">
+                      <li>Real-time booking system</li>
+                      <li>Verified technician profiles</li>
+                      <li>Price comparison system</li>
+                      <li>Ratings & reviews</li>
+                      <li>Live service tracking</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Project 2: Telemedicine -->
+              <div class="j-slide slide-2">
+                <span class="j-project-number">02</span>
+                <div class="j-img-wrapper">
+                  <img src="asset/Projects/Telemedicine.png" alt="Telemedicine Platform">
+                  <div class="j-img-overlay"></div>
+                </div>
+                <div class="j-details">
+                  <div class="j-header">
+                    <h3>Telemedicine</h3>
+                    <div class="j-header-right">
+                      <div class="j-status status-completed"><span class="status-dot"></span> Done</div>
+                      <div class="j-links">
+                        <a href="https://github.com/Shridhar2622/Telemedicine" target="_blank" title="GitHub Repository"><i class='bx bxl-github'></i></a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="j-tech-badges">
+                    <span class="tech-badge">React</span>
+                    <span class="tech-badge">Node.js</span>
+                    <span class="tech-badge">MongoDB</span>
+                    <span class="tech-badge">Socket.io</span>
+                  </div>
+                  <p class="j-summary">A comprehensive healthcare platform for seamless interactions between patients and verified doctors. Book appointments, engage in real-time chat/video consultations, and receive digital prescriptions.</p>
+                  
+                  <button class="more-details-btn"><span> More Details </span><i class='bx bx-chevron-down'></i></button>
+
+                  <div class="details-expanded">
+                    <ul class="j-features">
+                      <li>Online appointment booking system</li>
+                      <li>Real-time chat & video consultation</li>
+                      <li>Doctor verification & profiles</li>
+                      <li>Digital prescriptions & medical history</li>
+                      <li>Secure authentication (patient/doctor/admin roles)</li>
+                      <li>Appointment reminders & notifications</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Project 3: Doodle Dash -->
+              <div class="j-slide slide-3">
+                <span class="j-project-number">03</span>
+                <div class="j-img-wrapper">
+                  <img src="asset/Projects/Doodle-Dash.png" alt="Doodle Dash Game">
+                  <div class="j-img-overlay"></div>
+                </div>
+                <div class="j-details">
+                  <div class="j-header">
+                    <h3>Doodle Dash</h3>
+                    <div class="j-header-right">
+                      <div class="j-status status-progress"><span class="status-dot"></span> WIP</div>
+                      <div class="j-links">
+                        <a href="https://github.com/Shridhar2622/letsdraw" target="_blank" title="GitHub Repository"><i class='bx bxl-github'></i></a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="j-tech-badges">
+                    <span class="tech-badge">React</span>
+                    <span class="tech-badge">Socket.io</span>
+                    <span class="tech-badge">Canvas API</span>
+                    <span class="tech-badge">Node.js</span>
+                  </div>
+                  <p class="j-summary">An interactive multiplayer web application where users can draw, guess, and play with friends in real-time. Combines creativity and gaming with real-time canvas synchronization and multiplayer rooms.</p>
+                  
+                  <button class="more-details-btn"><span> More Details </span><i class='bx bx-chevron-down'></i></button>
+
+                  <div class="details-expanded">
+                    <ul class="j-features">
+                      <li>Interactive multiplayer drawing game</li>
+                      <li>Real-time canvas synchronization</li>
+                      <li>Multiplayer rooms & lobbies</li>
+                      <li>Live chat and guessing mechanics</li>
+                      <li>Scoring systems & leaderboards</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
-          <div class="project-details">
-            <h3 id="journey-title">Cozy Tracker</h3>
-            <p id="journey-desc">A minimal and cute web app designed to track your daily goals with satisfying micro-interactions and sounds. This project explores the intersection of productivity and aesthetic design.</p>
-            <div class="corner-arrow">
-              <i class='bx bx-up-arrow-alt' style="transform: rotate(45deg);"></i>
-            </div>
-          </div>
-        </div>
+
+        </div> <!-- End journey-content-wrap -->
       </div>
     </section>
 
-    <!-- Projects Section -->
-    <section id="projects" class="projects hidden">
-      <h2>Featured Projects <i class='bx bx-briefcase'></i></h2>
-      <div class="grid">
-        <div class="project-card card">
-            <div class="card-img" style="background: linear-gradient(135deg, #ffc8dd, #ffafcc);">
-               <i class='bx bx-mobile-alt card-emoji' style="color: white; font-size: 4rem;"></i>
-            </div>
-            <div class="card-info">
-              <h3>Cozy Tracker</h3>
-              <p>A minimal and cute web app designed to track your daily goals with satisfying micro-interactions and sounds.</p>
-              <a href="#" class="card-link">Explore <i class='bx bx-right-arrow-alt'></i></a>
-            </div>
+    <!-- Behind the Code Section -->
+    <section id="behind-the-code" class="btc-section scroll-section">
+      <h2 class="section-title">Behind the Code <i class='bx bx-code-curly'></i></h2>
+      
+      <div class="btc-cards">
+        
+        <!-- Card 1: Inspiration -->
+        <div class="btc-card" id="btc-inspiration">
+          <div class="btc-card-bg" style="background-image: url('asset/behind-the-code/Dan-Shiffman.jpg');"></div>
+          <div class="btc-card-overlay"></div>
+          <div class="btc-card-content">
+            <span class="btc-card-label">Inspiration</span>
+            <h3 class="btc-card-title">Inspired by Curiosity</h3>
+            <p class="btc-card-person">Daniel Shiffman</p>
+            <p class="btc-card-desc">He showed me that coding isn't just logic — it's creativity. His work made me see programming as something fun and expressive.</p>
+            <blockquote class="btc-card-quote">"Act without expectations."</blockquote>
+          </div>
         </div>
-        <div class="project-card card">
-            <div class="card-img" style="background: linear-gradient(135deg, #bde0fe, #a2d2ff);">
-               <i class='bx bx-cloud card-emoji' style="color: white; font-size: 4rem;"></i>
-            </div>
-            <div class="card-info">
-              <h3>Cloud Notes</h3>
-              <p>A visually soothing markdown editor that categorizes all your brilliant ideas and meticulous notes automatically.</p>
-              <a href="#" class="card-link">Explore <i class='bx bx-right-arrow-alt'></i></a>
-            </div>
+
+        <!-- Card 2: Mindset -->
+        <div class="btc-card" id="btc-mindset">
+          <div class="btc-card-bg" style="background-image: url('asset/behind-the-code/reverse.png');"></div>
+          <div class="btc-card-overlay"></div>
+          <div class="btc-card-content">
+            <span class="btc-card-label">Mindset</span>
+            <h3 class="btc-card-title">I Learn by Breaking Things</h3>
+            <p class="btc-card-desc">I love diving deep into how things work, breaking systems apart and rebuilding them. Curiosity drives me more than instructions.</p>
+          </div>
         </div>
-        <div class="project-card card">
-            <div class="card-img" style="background: linear-gradient(135deg, #cdb4db, #bde0fe);">
-               <i class='bx bx-sun card-emoji' style="color: white; font-size: 4rem;"></i>
-            </div>
-            <div class="card-info">
-              <h3>Aesthetic Weather</h3>
-              <p>A weather dashboard that constantly adapts its beautifully crafted pastel themes to the current climate data.</p>
-              <a href="#" class="card-link">Explore <i class='bx bx-right-arrow-alt'></i></a>
-            </div>
+
+        <!-- Card 3: Future Vision -->
+        <div class="btc-card" id="btc-future">
+          <div class="btc-card-bg" style="background-image: url('asset/behind-the-code/future.png');"></div>
+          <div class="btc-card-overlay"></div>
+          <div class="btc-card-content">
+            <span class="btc-card-label">Vision</span>
+            <h3 class="btc-card-title">Building What I Imagine</h3>
+            <p class="btc-card-desc">I aim to become a creative developer, building meaningful, real-world applications — not just solving problems, but creating experiences.</p>
+          </div>
         </div>
+
       </div>
     </section>
+
+    <!-- Certificates Section -->
+    <section id="certificates" class="certificates-section scroll-section">
+      <h2 class="section-title">Certificates <i class='bx bx-certification'></i></h2>
+      <div class="certificates-grid wrapper">
+
+        <!-- Card 1: FreeCodeCamp -->
+        <div class="cert-card" data-pdf="asset/certificates/freecodecamp.pdf">
+          <div class="cert-card-number">01</div>
+          <div class="cert-card-accent"></div>
+          <div class="cert-card-badge cert-badge-fcc">
+            <i class='bx bxl-free-code-camp'></i>
+          </div>
+          <div class="cert-card-body">
+            <span class="cert-card-category">Web Development</span>
+            <h3 class="cert-card-title">Responsive Web Design</h3>
+            <span class="cert-card-issuer">FreeCodeCamp</span>
+            <p class="cert-card-desc">Mastered HTML5, CSS3, Flexbox, Grid, accessibility, and responsive design through 300+ hours of hands-on projects.</p>
+          </div>
+          <div class="cert-card-footer">
+            <div class="cert-card-cta">
+              <span>View Certificate</span>
+              <i class='bx bx-right-arrow-alt'></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Theory of Computation -->
+        <div class="cert-card" data-pdf="asset/certificates/1-7fccc074-785b-416a-8889-262d6dfc146c.pdf">
+          <div class="cert-card-number">02</div>
+          <div class="cert-card-accent"></div>
+          <div class="cert-card-badge cert-badge-coursera">
+            <i class='bx bxs-graduation'></i>
+          </div>
+          <div class="cert-card-body">
+            <span class="cert-card-category">Computer Science</span>
+            <h3 class="cert-card-title">Theory of Computation</h3>
+            <span class="cert-card-issuer">Coursera</span>
+            <p class="cert-card-desc">Studied automata theory, formal languages, computability, and complexity theory through a rigorous academic curriculum.</p>
+          </div>
+          <div class="cert-card-footer">
+            <div class="cert-card-cta">
+              <span>View Certificate</span>
+              <i class='bx bx-right-arrow-alt'></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Social Networks -->
+        <div class="cert-card" data-pdf="asset/certificates/Social Networks.pdf">
+          <div class="cert-card-number">03</div>
+          <div class="cert-card-accent"></div>
+          <div class="cert-card-badge cert-badge-nptel">
+            <i class='bx bxs-book-reader'></i>
+          </div>
+          <div class="cert-card-body">
+            <span class="cert-card-category">Data Science</span>
+            <h3 class="cert-card-title">Social Networks</h3>
+            <span class="cert-card-issuer">NPTEL</span>
+            <p class="cert-card-desc">Explored graph theory, network analysis, community detection, and social influence propagation models.</p>
+          </div>
+          <div class="cert-card-footer">
+            <div class="cert-card-cta">
+              <span>View Certificate</span>
+              <i class='bx bx-right-arrow-alt'></i>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Certificate Lightbox -->
+    <div id="cert-lightbox" class="cert-lightbox">
+      <button class="cert-lightbox-close" id="cert-lightbox-close" aria-label="Close">
+        <i class='bx bx-x'></i>
+      </button>
+      <div class="cert-lightbox-content">
+        <iframe id="cert-lightbox-iframe" src="" frameborder="0"></iframe>
+      </div>
+    </div>
 
     <!-- Contact Section -->
     <section id="contact" class="contact hidden">
@@ -373,7 +595,7 @@
                     </button>
                     
                     <div class="gramophone-wrap">
-                        <div class="wanna-listen">Wanna listen?? put the pin</div>
+                        <div class="wanna-listen">put the pin</div>
                         <div class="gramophone-3d-base">
                             <div class="base-top"></div>
                             <div class="base-side"></div>
@@ -443,15 +665,14 @@
     </section>
   </main>
 
-  <footer>
-    <p>Made with 🤍 by Shridhar</p>
-  </footer>
+
 
   <!-- Include Physics and Animation Engines -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js"></script>
   <script src="script.js?v=6"></script>
 </body>
 </html>
