@@ -13,53 +13,66 @@ document.addEventListener('DOMContentLoaded', () => {
             { y: 0, autoAlpha: 1, duration: 1 }
         )
         // Stagger hero elements popping up
-        .fromTo(".hero-load",
-            { y: 30, autoAlpha: 0 },
-            { y: 0, autoAlpha: 1, duration: 1, stagger: 0.15 },
-            "-=0.5" // Start slightly before nav finishes
-        );
+        const heroElements = document.querySelectorAll('.hero-title, .hero-subtitle, .hero-desc, .hero-social-links, .hero-terminal');
+        if (heroElements.length > 0) {
+            tl.fromTo(heroElements,
+                { y: 30, autoAlpha: 0 },
+                { y: 0, autoAlpha: 1, duration: 1, stagger: 0.15 },
+                "-=0.5"
+            );
+        }
 
         // 2b. Continuous Floating Motion for Hero Background Icons and Avatar
         // Random drift using GSAP yoyo
-        gsap.utils.toArray('.floating-icon').forEach(icon => {
-            gsap.to(icon, {
-                y: "random(-40, 40)",
-                x: "random(-20, 20)",
-                rotation: "random(-25, 25)",
-                duration: "random(4, 7)",
+        const floatingIcons = gsap.utils.toArray('.floating-icon');
+        if (floatingIcons.length > 0) {
+            floatingIcons.forEach(icon => {
+                gsap.to(icon, {
+                    y: "random(-40, 40)",
+                    x: "random(-20, 20)",
+                    rotation: "random(-25, 25)",
+                    duration: "random(4, 7)",
+                    ease: "sine.inOut",
+                    yoyo: true,
+                    repeat: -1
+                });
+            });
+        }
+
+        // Gently float the avatar wrapper continuously
+        const avatar = document.querySelector('.avatar');
+        if (avatar) {
+            gsap.to(avatar, {
+                y: -15,
+                rotation: 2,
+                duration: 3,
                 ease: "sine.inOut",
                 yoyo: true,
                 repeat: -1
             });
-        });
-
-        // Gently float the avatar wrapper continuously
-        gsap.to(".avatar", {
-            y: -15,
-            rotation: 2,
-            duration: 3,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1
-        });
+        }
 
         // 2c. ScrollTrigger Section Reveal (Wow Factor while scrolling)
         const sections = document.querySelectorAll('.scroll-section');
         sections.forEach(sec => {
             // First animate the section title
-            gsap.fromTo(sec.querySelector('.section-title'),
-                { y: 40, autoAlpha: 0 },
-                {
-                    y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: sec,
-                        start: "top 80%",
+            const title = sec.querySelector('.section-title');
+            if (title) {
+                gsap.fromTo(title,
+                    { y: 40, autoAlpha: 0 },
+                    {
+                        y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out",
+                        scrollTrigger: {
+                            trigger: sec,
+                            start: "top 80%",
+                        }
                     }
-                }
-            );
+                );
+            }
 
             // Stagger multiple cards if present, otherwise just fade the content up
             const cards = sec.querySelectorAll('.card');
+            const content = sec.querySelector('.card, .section-content');
             if (cards.length > 1 && sec.classList.contains('stagger-cards')) {
                 gsap.fromTo(cards,
                     { y: 60, autoAlpha: 0, scale: 0.95 },
@@ -71,8 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 );
-            } else {
-                gsap.fromTo(sec.querySelector('.card, .section-content'), // Fallback to animating the card itself if no section-content wrapper exists
+            } else if (content) {
+                gsap.fromTo(content, // Fallback to animating the card itself if no section-content wrapper exists
                     { y: 40, autoAlpha: 0 },
                     {
                         y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out", delay: 0.2, // slightly after title
@@ -99,11 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 tl.to(revealWrapper, { width: "100%", duration: 0.6, ease: "power3.inOut" }) // 1. Draw the horizontal line
                   .to(aboutCard, { paddingBottom: 40, duration: 0.8, ease: "power3.inOut" }, "+=0") // 2. Add padding to bottom of card
-                  .to(revealWrapper, { height: "320px", duration: 0.8, ease: "power3.inOut" }, "<") // 3. Expand wrapper vertically downwards simultaneously
-                  .to(revealImg, { opacity: 1, scale: 1, filter: "grayscale(40%) blur(0px)", duration: 0.8, ease: "power2.out" }, "-=0.4"); // 4. Finally reveal the photo
+                  .to(revealWrapper, { height: "450px", duration: 0.8, ease: "power3.inOut" }, "<") // 3. Expand wrapper vertically
+                  .to(revealImg, { opacity: 1, filter: "grayscale(100%)", duration: 0.8, ease: "power2.out" }, "-=0.4"); // 4. Reveal photo (start grayscale)
             }
         });
     }
+
 
     // ---- 3. Interactive Floating Particles Canvas Background ----
     function initBackground() {
@@ -189,29 +203,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     initBackground();
 
-    // ---- 4. Contact Form Submission Micro-interaction ----
+    // ---- 4. Contact Form Submission (FormSubmit.co) ----
     const contactForm = document.querySelector('.contact-form');
     if(contactForm) {
-        contactForm.addEventListener('submit', (e) => {
+        contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = contactForm.querySelector('.submit-btn');
             const originalText = btn.innerHTML;
             
             btn.innerHTML = 'Sending... <i class=\'bx bx-loader-alt bx-spin\'></i>';
-            btn.style.transform = 'scale(0.95)';
+            btn.disabled = true;
             
-            setTimeout(() => {
-                btn.innerHTML = 'Message Sent! ✨';
-                btn.style.background = 'linear-gradient(135deg, var(--accent-2), var(--accent-3))';
-                btn.style.transform = 'scale(1.05)';
-                contactForm.reset();
+            const formData = new FormData(contactForm);
+            
+            try {
+                const response = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
+                });
                 
+                if (response.ok) {
+                    btn.innerHTML = 'Message Sent! ✨';
+                    btn.style.background = 'linear-gradient(135deg, var(--accent-2), var(--accent-3))';
+                    contactForm.reset();
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Form submission failed');
+                }
+            } catch (error) {
+                btn.innerHTML = 'Oops! Error ❌';
+                btn.style.background = '#ff5f56';
+            } finally {
                 setTimeout(() => {
                     btn.innerHTML = originalText;
                     btn.style.background = '';
-                    btn.style.transform = '';
+                    btn.disabled = false;
                 }, 3000);
-            }, 1200);
+            }
+        });
+    }
+
+    // ---- 4.1 Mobile Menu Toggle ----
+    const menuToggle = document.getElementById('menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            const icon = menuToggle.querySelector('i');
+            if (navLinks.classList.contains('active')) {
+                icon.className = 'bx bx-x';
+            } else {
+                icon.className = 'bx bx-menu-alt-right';
+            }
+        });
+
+        // Close menu on link click
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                menuToggle.querySelector('i').className = 'bx bx-menu-alt-right';
+            });
         });
     }
 
@@ -224,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let gameLoop;
         let isHovering = false;
         let score = 0;
+        let lastTime = 0;
 
         // Player Paddle
         const paddle = { x: gameCanvas.width/2 - 35, y: gameCanvas.height - 30, w: 70, h: 10, color: '#69f0ae' };
@@ -275,7 +328,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sideTerminal.addEventListener('mouseenter', () => {
             isHovering = true;
-            if(!gameLoop) gameLoop = requestAnimationFrame(updateGame);
+            if(!gameLoop) {
+                lastTime = performance.now();
+                gameLoop = requestAnimationFrame(updateGame);
+            }
         });
 
         sideTerminal.addEventListener('mouseleave', () => {
@@ -291,12 +347,16 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.dx = (Math.random() > 0.5 ? 1 : -1) * ball.speed;
         }
 
-        function updateGame() {
+        function updateGame(currentTime) {
             if(!isHovering) return;
 
+            // Calculate delta time
+            const deltaTime = (currentTime - lastTime) / 16.67; // Normalize to 60fps (16.67ms)
+            lastTime = currentTime;
+
             // Move ball
-            ball.x += ball.dx;
-            ball.y += ball.dy;
+            ball.x += ball.dx * deltaTime;
+            ball.y += ball.dy * deltaTime;
 
             // Wall collisions (Left/Right/Top)
             if (ball.x + ball.r > gameCanvas.width || ball.x - ball.r < 0) {
@@ -314,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let hitPoint = ball.x - (paddle.x + paddle.w/2);
                 ball.dx = hitPoint * 0.15;
                 
-                // Normalize speed vector completely to prevent it getting stuck going horizontal
+                // Normalize speed vector completely
                 const currentSpeed = Math.sqrt(ball.dx*ball.dx + ball.dy*ball.dy);
                 ball.dx = (ball.dx / currentSpeed) * ball.speed;
                 ball.dy = (ball.dy / currentSpeed) * ball.speed;
@@ -332,6 +392,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         ball.dy = -ball.dy;
                         b.status = 0; // Break it
                         score += 10;
+                        
+                        // Re-normalize slightly to keep speed stable after collision
+                        const currentSpeed = Math.sqrt(ball.dx*ball.dx + ball.dy*ball.dy);
+                        ball.dx = (ball.dx / currentSpeed) * ball.speed;
+                        ball.dy = (ball.dy / currentSpeed) * ball.speed;
                     }
                 }
             }
@@ -450,6 +515,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             card.addEventListener('mouseenter', () => {
+                triggerDrop();
+            });
+
+            // Touch support for mobile
+            card.addEventListener('touchstart', (e) => {
+                if (!card.classList.contains('active-drop')) {
+                    e.preventDefault(); // Prevent scrolling if it's the first touch
+                    triggerDrop();
+                }
+            }, { passive: false });
+
+            function triggerDrop() {
                 clearTimeout(destroyTimeout); 
                 gsap.killTweensOf(iconNodes); // Stop any exit fade
                 
@@ -464,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.classList.add('active-drop');
 
                 engine = Engine.create();
-                engine.gravity.y = 2.0; // Very heavy gravity for instant fall
+                engine.gravity.y = 2.0;
 
                 const width = card.clientWidth || 300; 
                 const height = card.clientHeight || 250; 
@@ -522,10 +599,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         icon.style.opacity = '1';
 
                         const dropX = spacing * (i + 1);
-                        const dropY = -h - 5; // Spawn right at the edge for immediate visibility
+                        const dropY = -h - 5; 
 
                         const body = Bodies.rectangle(dropX, dropY, w, h, {
-                            restitution: 0.3, // Less bouncy for a 'thud' feel
+                            restitution: 0.3, 
                             friction: 0.5, 
                             frictionAir: 0.01,
                             chamfer: { radius: 10 },
@@ -535,10 +612,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         bodiesData.push({ body, el: icon, w, h });
                         Composite.add(engine.world, body);
                         
-                    }, i * 15); // Fast stagger (15ms)
+                    }, i * 15); 
                     dropTimeouts.push(t);
                 });
-            });
+            }
 
             card.addEventListener('mouseleave', () => {
                 destroyTimeout = setTimeout(destroyPhysics, 50); 
@@ -562,9 +639,33 @@ document.addEventListener('DOMContentLoaded', () => {
             orbitSpeedY: 0.004 + (Math.random() * 0.002),
             radiusScale: 0.8 + (Math.random() * 0.4),
             isExamining: false,
-            scaleBounce: 1
+            scaleBounce: 1,
+            customMessageTime: 0,
+            customMessage: ""
         }));
         
+        let flowerActive = false;
+        let flowerOffTime = 0;
+        const flowerBtn = document.getElementById('flower-btn');
+        if (flowerBtn) {
+            flowerBtn.addEventListener('click', () => {
+                flowerActive = !flowerActive;
+                flowerBtn.classList.toggle('active', flowerActive);
+                
+                beeData.forEach(data => {
+                    data.customMessage = flowerActive ? "Ouu flower" : "Missed u";
+                    data.customMessageTime = Date.now();
+                    
+                    if (!flowerActive) {
+                        flowerOffTime = Date.now();
+                    } else {
+                        data.el.style.opacity = '1';
+                        data.scaleBounce = 1.2; // Tiny jump of excitement
+                    }
+                });
+            });
+        }
+
         window.beeMouseX = -1000;
         window.beeMouseY = -1000;
         
@@ -582,79 +683,129 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dyMouse = window.beeMouseY - data.beeY;
                 const distToMouse = Math.sqrt(dxMouse*dxMouse + dyMouse*dyMouse);
 
+                const timeSinceCustomMsg = Date.now() - data.customMessageTime;
+                
+                // If flower is off, wait tiny bit before they speak and enter
+                let delayReturning = (!flowerActive && flowerOffTime > 0 && Date.now() - flowerOffTime < 300);
+                const isShowingCustomMsg = !delayReturning && timeSinceCustomMsg < 3500;
+
                 const bubbleContents = ["Bzz!", "Hi there!", "Cute cursor!", "What's this?", "Zzz...", "Follow you!"];
 
-                // Deep Interaction State: If mouse is very close or directly on it, Stop and Stare
-                if (distToMouse < 90) {
-                    if (!data.isExamining) {
-                        data.isExamining = true;
+                // 1. Determine interaction states and bubbles
+                if (flowerActive) {
+                    data.isExamining = false; // Override mouse interaction
+                    if (isShowingCustomMsg) {
                         data.el.classList.add('examining');
                         const bubble = data.el.querySelector('.bee-bubble');
-                        if (bubble) bubble.innerText = bubbleContents[Math.floor(Math.random() * bubbleContents.length)];
-                    }
-                    // Gradually halt orbit rotation so it "stops" in mid-air
-                    data.orbitSpeedX *= 0.9; 
-                    data.orbitSpeedY *= 0.9;
-                    // Bounce scale up quickly because it's curious
-                    data.scaleBounce += (1.3 - data.scaleBounce) * 0.2;
-                } else {
-                    if (data.isExamining) {
-                        data.isExamining = false;
+                        if (bubble) bubble.innerText = data.customMessage;
+                    } else {
                         data.el.classList.remove('examining');
                     }
-                    // Gradually restore orbit speed
-                    data.orbitSpeedX += (data.baseSpeedX - data.orbitSpeedX) * 0.05;
-                    data.orbitSpeedY += (data.baseSpeedY - data.orbitSpeedY) * 0.05;
-                    // Restore natural size
-                    data.scaleBounce += (1 - data.scaleBounce) * 0.1;
+                } else if (delayReturning) {
+                    data.el.classList.remove('examining');
+                } else if (isShowingCustomMsg) {
+                    data.isExamining = false;
+                    data.el.classList.add('examining');
+                    const bubble = data.el.querySelector('.bee-bubble');
+                    if (bubble) bubble.innerText = data.customMessage;
+                } else {
+                    // Normal Mouse Interaction
+                    if (distToMouse < 90) {
+                        if (!data.isExamining) {
+                            data.isExamining = true;
+                            data.el.classList.add('examining');
+                            const bubble = data.el.querySelector('.bee-bubble');
+                            if (bubble) bubble.innerText = bubbleContents[Math.floor(Math.random() * bubbleContents.length)];
+                        }
+                        data.orbitSpeedX *= 0.9; 
+                        data.orbitSpeedY *= 0.9;
+                        data.scaleBounce += (1.3 - data.scaleBounce) * 0.2;
+                    } else {
+                        if (data.isExamining) {
+                            data.isExamining = false;
+                            data.el.classList.remove('examining');
+                        }
+                        data.orbitSpeedX += (data.baseSpeedX - data.orbitSpeedX) * 0.05;
+                        data.orbitSpeedY += (data.baseSpeedY - data.orbitSpeedY) * 0.05;
+                        data.scaleBounce += (1 - data.scaleBounce) * 0.1;
+                        
+                        data.el.classList.remove('examining'); // Ensures custom message disappears
+                    }
                 }
 
-                // Core drifting orbit calculation
+                // 2. Calculate Targets
                 data.beeAngle += data.orbitSpeedX;
                 data.beeAngleY += data.orbitSpeedY;
                 
-                const radiusX = window.innerWidth * 0.4 * data.radiusScale;
-                const radiusY = window.innerHeight * 0.35 * data.radiusScale;
-                
-                let targetX = centerX + Math.sin(data.beeAngle) * radiusX;
-                let targetY = centerY + Math.cos(data.beeAngleY) * radiusY;
+                let targetX, targetY, flightSpeed;
 
-                // Gentle curiosity pull from further away
-                if (!data.isExamining && distToMouse < 400 && distToMouse > 90) { 
-                    const curiosityPull = 1 - (distToMouse / 400); 
-                    targetX += dxMouse * (curiosityPull * 0.4); 
-                    targetY += dyMouse * (curiosityPull * 0.4);
-                } else if (data.isExamining) {
-                    // When examining, target the mouse specifically but keep a small cute offset
-                    targetX = window.beeMouseX - 20;
-                    targetY = window.beeMouseY + 10;
+                if (flowerActive) {
+                    // Fly up to top right gently to OFF SCREEN
+                    targetX = window.innerWidth + 200;
+                    targetY = -200;
+                    flightSpeed = 0.015; // smooth relaxed pace
+                } else if (delayReturning) {
+                    // Park completely off screen while waiting
+                    targetX = window.innerWidth + 200;
+                    targetY = -200;
+                    data.beeX = targetX;
+                    data.beeY = targetY;
+                    flightSpeed = 1; 
+                } else {
+                    const radiusX = window.innerWidth * 0.4 * data.radiusScale;
+                    const radiusY = window.innerHeight * 0.35 * data.radiusScale;
+                    targetX = centerX + Math.sin(data.beeAngle) * radiusX;
+                    targetY = centerY + Math.cos(data.beeAngleY) * radiusY;
+
+                    if (isShowingCustomMsg) {
+                        // Enter stage smoothly to resume natural lazylorbit, NOT tracking mouse
+                        flightSpeed = 0.012;
+                    } else if (!data.isExamining && distToMouse < 400 && distToMouse > 90) { 
+                        const curiosityPull = 1 - (distToMouse / 400); 
+                        targetX += dxMouse * (curiosityPull * 0.4); 
+                        targetY += dyMouse * (curiosityPull * 0.4);
+                        flightSpeed = 0.012;
+                    } else if (data.isExamining) {
+                        targetX = window.beeMouseX - 20;
+                        targetY = window.beeMouseY + 10;
+                        flightSpeed = 0.08;
+                    } else {
+                        flightSpeed = 0.012;
+                    }
                 }
 
-                // Variable physical inertia depending on state
-                let flightSpeed = 0.012; 
-                if (data.isExamining) {
-                    flightSpeed = 0.08; // Snap to examine the cursor much faster
-                }
-                
                 data.beeX += (targetX - data.beeX) * flightSpeed;
                 data.beeY += (targetY - data.beeY) * flightSpeed;
+                
+                // 3. Keep opacity and scale normal as they fly completely off-screen
+                data.el.style.opacity = '1';
 
+                // 4. Transform and Flipping (Fixing the bubble flip issue)
                 const vx = targetX - data.beeX;
                 const vy = targetY - data.beeY;
                 
-                // Keep the bee flipped to face the right direction, but restrict flipping if examining so it doesn't violently vibrate if the cursor is exactly centered
                 let flipped = 1;
-                if (!data.isExamining || (data.isExamining && Math.abs(vx) > 5)) {
-                    if (window.beeMouseX < data.beeX && data.isExamining) flipped = -1; // Face cursor strictly
-                    else if (vx > 0) flipped = -1; // Normal face right
+                if (!flowerActive && !delayReturning) {
+                    if (!data.isExamining || (data.isExamining && Math.abs(vx) > 5)) {
+                        if (window.beeMouseX < data.beeX && data.isExamining) flipped = -1; 
+                        else if (vx > 0) flipped = -1; 
+                    }
+                } else if (flowerActive) {
+                    flipped = -1; // Face right towards the off-screen flower
                 }
 
                 let tilt = (vy * 0.005) * flipped; 
                 tilt = Math.max(-0.15, Math.min(0.15, tilt));
                 
-                // Add the bounce scaling to the CSS transform
-                data.el.style.transform = `translate(${data.beeX - 60}px, ${data.beeY - 60}px) scale(${data.scaleBounce}) scaleX(${flipped}) rotate(${tilt}rad)`;
-                data.el.style.transition = 'transform 0.1s ease-out'; // Smooth out micro-jitters
+                // Remove scaleX from container so the speech bubble stays pointing perfectly normal
+                data.el.style.transform = `translate(${data.beeX - 60}px, ${data.beeY - 60}px) scale(${data.scaleBounce}) rotate(${tilt}rad)`;
+                data.el.style.transition = 'transform 0.1s ease-out, opacity 0.3s ease-out';
+                
+                // Apply ONLY to the image to flip the bee
+                const beeBodyImg = data.el.querySelector('.bee-body');
+                if (beeBodyImg) {
+                    beeBodyImg.style.transform = `scaleX(${flipped})`;
+                }
             });
         });
     }
@@ -967,3 +1118,135 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+
+// ---- 7. Project Journey Refined Logic (ScrollTrigger Pinning & Scaling) ----
+function initProjectJourney() {
+    const section = document.querySelector('.project-journey');
+    const container = document.querySelector('.journey-container');
+    const progressLine = document.querySelector('.progress-line');
+    const journeyVideo = document.getElementById('journey-video');
+    const projectItems = document.querySelectorAll('.project-item');
+    const journeyTitle = document.getElementById('journey-title');
+    const journeyDesc = document.getElementById('journey-desc');
+
+    if (!section || !container || !journeyVideo) return;
+
+    const projectData = {
+        1: {
+            title: "Cozy Tracker",
+            video: "https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-921-large.mp4",
+            desc: "A minimal and cute web app designed to track your daily goals with satisfying micro-interactions and sounds. This project explores the intersection of productivity and aesthetic design."
+        },
+        2: {
+            title: "Cloud Notes",
+            video: "https://assets.mixkit.co/videos/preview/mixkit-set-of-keys-on-a-mixing-console-4424-large.mp4",
+            desc: "A visually soothing markdown editor that categorizes all your brilliant ideas and meticulous notes automatically. Built with a focus on typography and readability."
+        },
+        3: {
+            title: "Aesthetic Weather",
+            video: "https://assets.mixkit.co/videos/preview/mixkit-man-working-on-his-laptop-308-large.mp4",
+            desc: "A weather dashboard that constantly adapts its beautifully crafted pastel themes to the current climate data. It uses glassmorphism and real-time animations to provide a unique glance at the day's forecast."
+        }
+    };
+
+    // Main ScrollTrigger Timeline
+    const tl = gsap.timeline({
+        scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: "+=4000", 
+            pin: true,
+            scrub: 1,
+        }
+    });
+
+    // 1. Initial Opacity fade-in Only (No Scale)
+    tl.to(container, {
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out"
+    });
+
+    // 2. Animate the progress line height from start to finish
+    // This runs in parallel with the content transitions
+    tl.to(progressLine, {
+        height: "100%",
+        ease: "none",
+        duration: 3 // Total length of the timeline's main content parts
+    }, 0.5);
+
+    // 3. Project 1 Delay
+    tl.to({}, { duration: 0.8 }); 
+
+    // 4. Transition to Project 2 (at around 1/3 of the height)
+    tl.to(container, {
+        opacity: 0,
+        y: 20,
+        duration: 0.4,
+        onComplete: () => updateProjectContent(2)
+    });
+    tl.to(container, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4
+    });
+    tl.to({}, { duration: 0.8 }); 
+
+    // 5. Transition to Project 3 (at around 2/3 of the height)
+    tl.to(container, {
+        opacity: 0,
+        y: 20,
+        duration: 0.4,
+        onComplete: () => updateProjectContent(3)
+    });
+    tl.to(container, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4
+    });
+    tl.to({}, { duration: 0.8 }); 
+
+    // Helper to update content
+    function updateProjectContent(id) {
+        const data = projectData[id];
+        if (!data) return;
+
+        // Update active sidebar item
+        projectItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('data-project') == id) {
+                item.classList.add('active');
+            }
+        });
+
+        // Update Text and Video with a subtle fade
+        gsap.to([journeyTitle, journeyDesc, journeyVideo], {
+            opacity: 0,
+            duration: 0.2,
+            onComplete: () => {
+                journeyTitle.innerText = data.title;
+                journeyDesc.innerText = data.desc;
+                journeyVideo.querySelector('source').src = data.video;
+                journeyVideo.load();
+                journeyVideo.play().catch(e => {});
+                
+                gsap.to([journeyTitle, journeyDesc, journeyVideo], {
+                    opacity: 1,
+                    duration: 0.4
+                });
+            }
+        });
+    }
+
+    // Hover-to-play enhancement
+    const videoWrapper = document.querySelector('.video-wrapper');
+    videoWrapper.addEventListener('mouseenter', () => {
+        journeyVideo.play().catch(e => {});
+    });
+    videoWrapper.addEventListener('mouseleave', () => {
+        journeyVideo.pause();
+    });
+}
+
+// Call the init function
+initProjectJourney();

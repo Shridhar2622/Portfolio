@@ -148,6 +148,17 @@ h1, h2, h3 {
   gap: 24px;
 }
 
+@media (min-width: 769px) {
+  .nav-links {
+     position: static;
+     transform: none;
+     background: none;
+     backdrop-filter: none;
+     width: auto;
+     height: auto;
+  }
+}
+
 .nav-links a {
   text-decoration: none;
   color: var(--text-primary);
@@ -160,23 +171,55 @@ h1, h2, h3 {
   color: var(--accent-3);
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.menu-toggle {
+  display: none;
+  background: var(--accent-1);
+  color: #121212 !important;
+  border: none;
+  font-size: 1.8rem;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1001;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
 /* -------------------------------- */
 /* Hero Terminal / Atari Game       */
 /* -------------------------------- */
 .hero-split {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 0; 
-  max-width: 1250px; 
+  gap: 60px; 
+  max-width: 1100px; 
   margin: 0 auto;
   width: 100%;
 }
 
 .hero-terminal {
-  flex: 0 0 40% !important; /* Strict 40% layout balance */
-  height: 550px !important; /* Harmonized height */
+  width: 100%;
+  height: 500px; /* Harmonized height */
   background: rgba(20, 20, 25, 0.85); /* Deep terminal dark */
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -191,11 +234,11 @@ h1, h2, h3 {
 }
 
 .hero-content {
-  flex: 0 0 60%; /* Strict 60% layout balance */
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: flex-start; /* Ensure left alignment of text is maintained */
-  padding-left: 5%; /* Shift text slightly right to balance the large terminal */
+  width: 100%;
 }
 
 .hero-terminal:hover {
@@ -388,7 +431,6 @@ section {
 }
 
 .hero-content {
-  flex: 1; /* Forces strict right column size exactly taking the rest */
   text-align: left;
   position: relative;
 }
@@ -501,7 +543,7 @@ section {
 /* Removed hero-buttons previously here */
 
 /* -------------------------------- */
-/* About Section Hover Reveal       */
+/* About Section Elegant Reveal (No Shatter) */
 /* -------------------------------- */
 .about-card {
   display: flex;
@@ -509,10 +551,10 @@ section {
   align-items: center;
   justify-content: center;
   text-align: center;
-  max-width: 900px; /* Increased from 800px */
+  max-width: 900px;
   margin: 0 auto;
-  gap: 20px;
-  padding-bottom: 0px; /* Initial state, expanded tightly downwards by GSAP */
+  gap: 40px;
+  padding-bottom: 0px; 
 }
 
 .about-text-content {
@@ -520,44 +562,76 @@ section {
 }
 
 .about-text-content p {
-  font-size: 1.3rem; /* Scaled up from 1.15rem */
-  line-height: 1.6;
-  margin-bottom: 20px;
+  font-size: 1.3rem; 
+  line-height: 1.8;
+  margin-bottom: 25px;
   padding: 0 10px;
+  color: var(--text-secondary);
 }
 
 .about-reveal-wrapper {
-  width: 0px;  /* Will be animated by GSAP */
-  max-width: 600px; /* Increased from 500px */
-  height: 2px; /* Will be animated by GSAP */
+  width: 0px;  /* Animated by GSAP */
+  max-width: 500px;
+  height: 2px; /* Animated by GSAP */
   opacity: 1;
   overflow: hidden;
-  margin: 25px auto 0 auto;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px var(--shadow-color);
-  background: linear-gradient(135deg, var(--accent-1), var(--accent-3)); 
+  margin: 0 auto;
+  border-radius: 40px; /* Matches the reference */
+  box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+  background: #1a1a1e; /* lifted dark background */
+  padding: 0; /* Removing internal framing for a cleaner look */
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Make the image itself highly interactive now it's out in the open */
-.about-reveal-img {
+/* Container for the image, simplified */
+.shatter-container {
+  position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 20px;
-  object-fit: cover;
-  display: block;
-  opacity: 0; /* Hidden initially, GSAP will fade it in */
-  transform: scale(1.1); /* Zoom out effect on reveal */
-  filter: grayscale(40%) blur(10px);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease, box-shadow 0.4s ease;
-  position: relative;
+  border-radius: 40px;
+  overflow: hidden;
   cursor: pointer;
 }
 
-/* Image Hover - Float up, gain color, cast colored glow */
-.about-reveal-img:hover {
-  transform: translateY(-8px) scale(1.02) !important;
-  filter: grayscale(0%) blur(0px) !important;
-  box-shadow: 0 15px 40px rgba(200, 182, 255, 0.4); /* Accent glowing shadow */
+/* No more shards */
+.shard {
+  display: none !important;
+}
+
+/* Original image - Grayscale to Color */
+.about-reveal-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 40px;
+  object-fit: cover;
+  display: block;
+  opacity: 0; /* Revealed by GSAP */
+  filter: grayscale(100%); /* Initial grayscale */
+  transition: filter 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Image Hover - Color reveal only, NO SCALE */
+.shatter-container:hover .about-reveal-img {
+  filter: grayscale(0%) !important;
+}
+
+/* Optional: Subtle label at the bottom of the card like reference */
+.about-reveal-wrapper::after {
+    content: "Shridhar Pandey — Developer";
+    position: absolute;
+    bottom: 25px;
+    left: 30px;
+    color: var(--accent-1);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.about-reveal-wrapper:hover::after {
+    opacity: 1;
 }
 
 /* -------------------------------- */
@@ -793,8 +867,29 @@ footer {
 }
 
 /* -------------------------------- */
-/* Interactive Flying Bee           */
+/* Interactive Flying Bee & Flower  */
 /* -------------------------------- */
+.flower-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  z-index: 2000;
+  margin-left: 15px;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+  filter: drop-shadow(0 4px 10px rgba(255, 181, 167, 0.4)) grayscale(40%);
+}
+
+.flower-btn:hover {
+  transform: scale(1.15) rotate(15deg);
+  filter: drop-shadow(0 8px 15px rgba(255, 181, 167, 0.8)) grayscale(0%);
+}
+
+.flower-btn.active {
+  transform: scale(1.1) rotate(-15deg);
+  filter: drop-shadow(0 0 25px rgba(255, 181, 167, 1)) grayscale(0%);
+}
+
 .bee-container {
   position: fixed; /* Bound to viewport so it floats globally */
   width: 120px;  /* Increased size for bee2 */
@@ -876,7 +971,7 @@ footer {
 
   /* Make hero stack vertically on mobile */
   .hero-split {
-    flex-direction: column-reverse;
+    grid-template-columns: 1fr;
     text-align: center;
     gap: 40px;
   }
@@ -1516,4 +1611,327 @@ footer {
 @keyframes rotateVinyl {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* -------------------------------- */
+/* Project Journey Section (Elegant & Grayscale Effect) */
+/* -------------------------------- */
+.project-journey {
+  padding-bottom: 250px;
+  perspective: 2000px;
+}
+
+.journey-container {
+  display: flex;
+  gap: 80px;
+  background: transparent; 
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  min-height: 700px;
+  position: relative;
+  overflow: visible;
+  /* Removed initial scale and opacity animation from here to comply with 'no scale' */
+  opacity: 1; /* Start visible for better feel if no scale */
+}
+
+.journey-sidebar {
+  width: 250px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sidebar-line {
+  position: absolute;
+  left: 30px;
+  top: 50px;
+  bottom: 50px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.progress-line {
+  position: absolute;
+  left: 30px;
+  top: 50px;
+  width: 3px;
+  height: 0%;
+  background: linear-gradient(to bottom, var(--accent-1), var(--accent-3));
+  box-shadow: 0 0 15px rgba(255, 181, 167, 0.8);
+  border-radius: 4px;
+  z-index: 2;
+}
+
+.project-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 120px;
+  z-index: 3;
+}
+
+.project-item {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  cursor: pointer;
+}
+
+.project-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 4;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  margin-left: 23px;
+}
+
+.project-name {
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.3);
+  transition: all 0.5s ease;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.project-item.active .project-dot {
+  background: var(--accent-1);
+  border-color: var(--accent-1);
+  box-shadow: 0 0 30px var(--accent-1);
+  transform: scale(2);
+}
+
+.project-item.active .project-name {
+  color: white;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+}
+
+/* Main Content area */
+.journey-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  justify-content: center;
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 850px;
+  aspect-ratio: 16 / 9;
+  background: #1a1a1e; /* Dark slightly lifted background like the photo card */
+  border-radius: 40px; /* More rounded like the reference */
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 60px 120px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: background 0.4s ease;
+}
+
+.video-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%); /* Grayscale by default */
+  transition: filter 0.6s cubic-bezier(0.19, 1, 0.22, 1); /* Smooth color reveal */
+}
+
+.video-wrapper:hover video {
+  filter: grayscale(0%); /* Full color on hover */
+}
+
+/* Corner Arrow Icon */
+.journey-content {
+    position: relative;
+}
+
+.corner-arrow {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-1);
+    font-size: 1.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s ease;
+}
+
+.video-wrapper:hover ~ .project-details .corner-arrow,
+.project-details:hover .corner-arrow {
+    background: var(--accent-1);
+    color: #121212;
+    transform: rotate(45deg);
+}
+
+.project-details {
+  padding-top: 20px;
+  position: relative;
+}
+
+.project-details h3 {
+  font-size: 2.2rem; /* Matches the Elara Vance name size better */
+  margin-bottom: 8px;
+  color: var(--accent-1); /* Use the accent color for title like the name */
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.project-details p {
+  color: rgba(255, 255, 255, 0.4); /* Dimmer like the subtitle */
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+/* Responsive adjustment */
+@media (max-width: 1100px) {
+  .journey-container {
+    flex-direction: column;
+    gap: 60px;
+  }
+  .journey-sidebar { width: 100%; }
+  .project-list { flex-direction: row; gap: 20px; text-align: center; }
+  .sidebar-line, .progress-line { display: none; }
+  .project-name { font-size: 0.8rem; letter-spacing: 2px; }
+  .project-dot { margin-left: 0; }
+  .corner-arrow { display: none; }
+}
+/* -------------------------------- */
+/* Mobile Responsive Overrides      */
+/* -------------------------------- */
+@media (max-width: 992px) {
+  .hero-split {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 40px;
+  }
+  
+  .hero-content {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .hero-title, .hero-subtitle, .hero-desc, .hero-social-links {
+    text-align: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hero-terminal {
+    order: 2;
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 20px;
+    left: 20px;
+    right: 20px;
+    width: auto;
+    transform: none;
+    max-width: none;
+  }
+  
+  .menu-toggle {
+    display: flex !important;
+  }
+  
+  .nav-links {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100vh;
+    background: rgba(10, 10, 15, 0.98);
+    backdrop-filter: blur(25px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 2000; /* Super high to cover everything */
+    border-left: none;
+    opacity: 0;
+    visibility: hidden;
+  }
+  
+  .nav-links.active {
+    left: 0;
+    opacity: 1;
+    visibility: visible;
+    display: flex !important; /* Ensure it's active-displayed */
+  }
+  
+  .nav-links a {
+    font-size: 1.2rem;
+  }
+  
+  main {
+    padding: 100px 15px 40px;
+  }
+  
+  section {
+    padding: 40px 0;
+  }
+  
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .about-card {
+    padding: 20px;
+  }
+  
+  .about-reveal-wrapper {
+    max-width: 100%;
+  }
+
+  .journey-container {
+    flex-direction: column;
+  }
+  
+  .journey-sidebar {
+    width: 100%;
+    padding-bottom: 30px;
+  }
+  
+  .project-list {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding-bottom: 15px;
+  }
+  
+  .sidebar-line, .progress-line {
+      display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.8rem; }
+  
+  .hero-terminal {
+    display: none; /* Hide terminal on very small screens to focus on content */
+  }
 }
