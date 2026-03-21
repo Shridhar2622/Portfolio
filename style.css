@@ -139,7 +139,17 @@ h1, h2, h3 {
   letter-spacing: -0.5px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center; /* Explicitly center */
+  gap: 8px; /* Slightly more gap for better balance */
+  line-height: 1; /* Normalize line-height */
+}
+
+.logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  height: 100%; /* Ensure it takes full height of parent flex */
 }
 
 .logo-text {
@@ -153,8 +163,10 @@ h1, h2, h3 {
   -webkit-text-fill-color: transparent;
   display: flex;
   align-items: center;
-  gap: 0; /* Ensure no gap between S and P */
+  justify-content: center;
+  gap: 0;
   cursor: pointer;
+  line-height: 1; /* Perfect vertical alignment */
 }
 
 .logo-reveal {
@@ -968,6 +980,8 @@ footer {
 }
 
 .bee-container {
+  will-change: transform;
+  transition: transform 0.1s ease-out, opacity 0.3s ease-out;
   position: fixed; /* Bound to viewport so it floats globally */
   width: 120px;  /* Increased size for bee2 */
   height: 120px;
@@ -3431,4 +3445,114 @@ footer {
   .footer-socials { gap: 20px; margin-bottom: 50px; }
   .footer-icon-link { width: 55px; height: 55px; font-size: 1.5rem; }
   .footer-bottom { font-size: 0.85rem; }
+}
+
+/* --- Mobile Hero/Bee Refinement (<480px) --- */
+@media screen and (max-width: 480px) {
+  .bee-container {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  .bee-bubble {
+    font-size: 10px !important;
+    padding: 4px 8px !important;
+    top: -5px !important;
+  }
+  .hero-title {
+    font-size: 1.8rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .hero-subtitle {
+    font-size: 1.2rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .hero-desc {
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important;
+  }
+  .hero-content {
+    padding: 0 15px !important;
+    text-align: center !important;
+  }
+  .hero-social-links {
+    justify-content: center !important;
+    gap: 15px !important;
+  }
+  .avatar {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 1.5rem !important;
+    margin: 0 auto 1rem !important;
+  }
+}
+
+/* --- Cute Custom Cursor --- */
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.cursor-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #FFD700; /* Bee Yellow */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.cursor-ring {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  border: 2px solid #FFC0CB; /* Flower Pink */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Hover effects */
+.cursor-hover .cursor-ring {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 192, 203, 0.2);
+  border-color: #FF69B4;
+  opacity: 1;
+}
+
+/* Hide default cursor on desktop */
+@media (min-width: 992px) {
+  html, body {
+    cursor: none !important;
+  }
+  
+  a, button, .social-icon, .j-nav-item, .cert-card, .btc-card, .menu-toggle, .flower-btn {
+    cursor: none !important;
+  }
+}
+
+/* --- Cute Custom Scrollbar --- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FFC0CB 0%, #FFD700 100%);
+  border-radius: 20px;
+  border: 2px solid #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF69B4;
 }

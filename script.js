@@ -691,22 +691,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const bees = document.querySelectorAll('.bee-container');
     
     if (bees.length > 0 && typeof gsap !== 'undefined') {
-        const beeData = Array.from(bees).map((bee, index) => ({
-            el: bee,
-            beeAngle: index * Math.PI, 
-            beeAngleY: index * (Math.PI / 2),
-            beeX: -100,
-            beeY: -100,
-            baseSpeedX: 0.003 + (Math.random() * 0.002), 
-            baseSpeedY: 0.004 + (Math.random() * 0.002),
-            orbitSpeedX: 0.003 + (Math.random() * 0.002),
-            orbitSpeedY: 0.004 + (Math.random() * 0.002),
-            radiusScale: 0.8 + (Math.random() * 0.4),
-            isExamining: false,
-            scaleBounce: 1,
-            customMessageTime: 0,
-            customMessage: ""
-        }));
+        const beeData = Array.from(bees).map((bee, index) => {
+            const bubble = bee.querySelector('.bee-bubble');
+            return {
+                el: bee,
+                bodyImg: bee.querySelector('.bee-body'),
+                bubble: bubble,
+                currentBubbleText: bubble ? bubble.innerText : "",
+                beeAngle: index * Math.PI, 
+                beeAngleY: index * (Math.PI / 2),
+                beeX: -100,
+                beeY: -100,
+                baseSpeedX: 0.003 + (Math.random() * 0.002), 
+                baseSpeedY: 0.004 + (Math.random() * 0.002),
+                orbitSpeedX: 0.003 + (Math.random() * 0.002),
+                orbitSpeedY: 0.004 + (Math.random() * 0.002),
+                radiusScale: 0.8 + (Math.random() * 0.4),
+                isExamining: false,
+                scaleBounce: 1,
+                customMessageTime: 0,
+                customMessage: ""
+            };
+        });
         
         let flowerActive = false;
         let flowerOffTime = 0;
@@ -748,7 +754,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const distToMouse = Math.sqrt(dxMouse*dxMouse + dyMouse*dyMouse);
 
                 const timeSinceCustomMsg = Date.now() - data.customMessageTime;
-                const timeSpentSeconds = (Date.now() - window.siteStartTime) / 1000;
                 
                 // If flower is off, wait tiny bit before they speak and enter
                 let delayReturning = (!flowerActive && flowerOffTime > 0 && Date.now() - flowerOffTime < 300);
@@ -757,14 +762,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Dynamic Context-Aware Bubble Contents
                 let bubbleContents = ["Bzz!", "Hi there!", "Cute cursor!", "What's this?", "Zzz...", "Follow you!", "Are you lost?", "I like your style!", "Nice coding!", "Just vibing."];
 
-
                 // 1. Determine interaction states and bubbles
                 if (flowerActive) {
                     data.isExamining = false; // Override mouse interaction
                     if (isShowingCustomMsg) {
                         data.el.classList.add('examining');
-                        const bubble = data.el.querySelector('.bee-bubble');
-                        if (bubble) bubble.innerText = data.customMessage;
+                        if (data.bubble && data.currentBubbleText !== data.customMessage) {
+                            data.bubble.innerText = data.customMessage;
+                            data.currentBubbleText = data.customMessage;
+                        }
                     } else {
                         data.el.classList.remove('examining');
                     }
@@ -773,16 +779,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (isShowingCustomMsg) {
                     data.isExamining = false;
                     data.el.classList.add('examining');
-                    const bubble = data.el.querySelector('.bee-bubble');
-                    if (bubble) bubble.innerText = data.customMessage;
+                    if (data.bubble && data.currentBubbleText !== data.customMessage) {
+                        data.bubble.innerText = data.customMessage;
+                        data.currentBubbleText = data.customMessage;
+                    }
                 } else {
                     // Normal Mouse Interaction
                     if (distToMouse < 90) {
                         if (!data.isExamining) {
                             data.isExamining = true;
                             data.el.classList.add('examining');
-                            const bubble = data.el.querySelector('.bee-bubble');
-                            if (bubble) bubble.innerText = bubbleContents[Math.floor(Math.random() * bubbleContents.length)];
+                            const randomMsg = bubbleContents[Math.floor(Math.random() * bubbleContents.length)];
+                            if (data.bubble && data.currentBubbleText !== randomMsg) {
+                                data.bubble.innerText = randomMsg;
+                                data.currentBubbleText = randomMsg;
+                            }
                         }
                         data.orbitSpeedX *= 0.9; 
                         data.orbitSpeedY *= 0.9;
@@ -864,14 +875,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 let tilt = (vy * 0.005) * flipped; 
                 tilt = Math.max(-0.15, Math.min(0.15, tilt));
                 
-                // Remove scaleX from container so the speech bubble stays pointing perfectly normal
-                data.el.style.transform = `translate(${data.beeX - 60}px, ${data.beeY - 60}px) scale(${data.scaleBounce}) rotate(${tilt}rad)`;
-                data.el.style.transition = 'transform 0.1s ease-out, opacity 0.3s ease-out';
+                // Optimized movement using translate3d for GPU acceleration
+                data.el.style.transform = `translate3d(${data.beeX - 60}px, ${data.beeY - 60}px, 0) scale(${data.scaleBounce}) rotate(${tilt}rad)`;
                 
-                // Apply ONLY to the image to flip the bee
-                const beeBodyImg = data.el.querySelector('.bee-body');
-                if (beeBodyImg) {
-                    beeBodyImg.style.transform = `scaleX(${flipped})`;
+                // Optimized flipping (apply scaleX only if it changes to avoid rework)
+                if (data.bodyImg) {
+                    data.bodyImg.style.transform = `scaleX(${flipped})`;
                 }
             });
         });
@@ -1317,32 +1326,30 @@ function initProjectJourney() {
         if (i !== 0) {
             const prevSlide = slides[i - 1];
             
-            // Fade out old slide (drifting up slightly)
-            // Starts halfway through the scroll distance to the next project
+            // Fade out old slide (drifting up more aggressively)
             tl.to(prevSlide, {
                 opacity: 0,
                 autoAlpha: 0,
-                y: -40,
+                y: -150, // Move significantly out to avoid overlap
                 zIndex: 1,
                 pointerEvents: "none",
-                duration: 0.5,
-                ease: "power2.inOut"
-            }, i - 0.5);
+                duration: 0.4,
+                ease: "power2.in"
+            }, i - 0.7); // Start early
             
-            // Fade in new slide (drifting up into place)
-            // Starts halfway through the scroll distance to the next project
+            // Fade in new slide (coming from below)
             tl.fromTo(slide, 
-                { opacity: 0, autoAlpha: 0, y: 40, zIndex: 1, pointerEvents: "none" },
+                { opacity: 0, autoAlpha: 0, y: 150, zIndex: 1, pointerEvents: "none" },
                 { 
                     opacity: 1, 
                     autoAlpha: 1, 
                     y: 0, 
                     zIndex: 10, 
                     pointerEvents: "auto", 
-                    duration: 0.5, 
-                    ease: "power2.inOut" 
+                    duration: 0.4, 
+                    ease: "power2.out" 
                 },
-                i - 0.5 // Reveal exactly between current dot and next dot
+                i - 0.3 // Delay entry until prev is mostly gone
             );
         }
     });
@@ -1445,3 +1452,79 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+/* --- Cute Custom Cursor Logic --- */
+function initCustomCursor() {
+    const cursor = document.querySelector('#custom-cursor');
+    const dot = document.querySelector('.cursor-dot');
+    const ring = document.querySelector('.cursor-ring');
+    
+    if (!cursor || !dot || !ring) return;
+
+    let mouseX = 0;
+    let mouseY = 0;
+    let ringX = 0;
+    let ringY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        
+        // Instant dot movement
+        gsap.set(dot, { x: mouseX, y: mouseY });
+    });
+
+    // Smooth trailing for the ring
+    gsap.ticker.add(() => {
+        const speed = 0.15;
+        ringX += (mouseX - ringX) * speed;
+        ringY += (mouseY - ringY) * speed;
+        
+        gsap.set(ring, { x: ringX, y: ringY });
+    });
+
+    // Cursor hover logic
+    function handleHover() {
+        const interactables = document.querySelectorAll('a, button, .social-icon, .j-nav-item, .cert-card, .btc-card, .menu-toggle, .flower-btn, .j-dot, .j-name');
+        interactables.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
+        });
+    }
+
+    // Run hover logic initially and after any major DOM updates (like project expansion)
+    handleHover();
+    
+    // Initial state
+    gsap.set([dot, ring], { opacity: 0 });
+    window.addEventListener('mousedown', () => gsap.to(ring, { scale: 0.8, duration: 0.1 }));
+    window.addEventListener('mouseup', () => gsap.to(ring, { scale: 1, duration: 0.1 }));
+    
+    // Show on first move
+    window.addEventListener('mousemove', () => {
+        gsap.to([dot, ring], { opacity: 1, duration: 0.3 });
+    }, { once: true });
+}
+
+// Coordinate Bee Dialogue (Prevent overlaps)
+function coordinateBees() {
+    gsap.ticker.add((time) => {
+        // If one bee is already examining (talking), others should stay quiet
+        const talkingBee = beeData.find(b => b.isExamining);
+        if (talkingBee) {
+            beeData.forEach(b => {
+                if (b !== talkingBee) {
+                    // Prevent others from entering examining state
+                    // b.canSpeak = false; // Simple flag logic if we added it
+                }
+            });
+        }
+    });
+}
+
+// Direct Init
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCustomCursor);
+} else {
+    initCustomCursor();
+}
