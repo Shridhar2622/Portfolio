@@ -1416,7 +1416,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openCertLightbox(pdfUrl) {
         if (!certLightbox || !certIframe) return;
-        certIframe.src = pdfUrl;
+        try {
+            // Encode the URL to handle spaces / special characters in filenames
+            certIframe.src = encodeURI(pdfUrl);
+        } catch (err) {
+            console.error('Failed to set cert iframe src', err);
+            alert('Unable to open certificate. Try downloading it instead.');
+            return;
+        }
         certLightbox.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
@@ -1435,6 +1442,37 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pdfUrl) openCertLightbox(pdfUrl);
         });
     });
+
+    // Also allow the CTA inside the card to open the lightbox (safer for nested clickable elements)
+    const certCtas = document.querySelectorAll('.cert-card-cta');
+    certCtas.forEach(cta => {
+        cta.setAttribute('role', 'button');
+        cta.setAttribute('tabindex', '0');
+        cta.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const card = cta.closest('.cert-card');
+            if (!card) return;
+            const pdfUrl = card.getAttribute('data-pdf');
+            if (pdfUrl) openCertLightbox(pdfUrl);
+        });
+        cta.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                cta.click();
+            }
+        });
+    });
+
+    // Basic iframe load/error handling
+    if (certIframe) {
+        certIframe.addEventListener('load', () => {
+            // loaded successfully
+        });
+        certIframe.addEventListener('error', () => {
+            alert('Failed to load certificate preview. You can download it from the repository under asset/certificates/.');
+            closeCertLightbox();
+        });
+    }
 
     if (certCloseBtn) {
         certCloseBtn.addEventListener('click', closeCertLightbox);

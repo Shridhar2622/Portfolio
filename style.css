@@ -604,6 +604,49 @@ section {
     box-shadow: 0 10px 25px rgba(200, 182, 255, 0.3);
 }
 
+/* Resume download button next to social icons */
+.resume-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  height: 45px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255,181,167,0.12), rgba(200,182,255,0.08));
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--accent-1);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+
+.resume-btn i {
+  font-size: 1.2rem;
+  color: var(--accent-1);
+}
+
+.resume-btn .resume-label {
+  display: inline-block;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.resume-btn:hover {
+  transform: translateY(-4px);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+  color: #121212;
+  box-shadow: 0 14px 40px rgba(200,182,255,0.18);
+}
+
+/* Keep layout tight on very small screens */
+@media (max-width: 480px) {
+  .hero-social-links { gap: 10px; }
+  .resume-label { display: none; }
+  .resume-btn { padding: 10px; width: 45px; justify-content: center; }
+}
+
 /* Removed hero-buttons previously here */
 
 /* -------------------------------- */
@@ -983,8 +1026,8 @@ footer {
   will-change: transform;
   transition: transform 0.1s ease-out, opacity 0.3s ease-out;
   position: fixed; /* Bound to viewport so it floats globally */
-  width: 120px;  /* Increased size for bee2 */
-  height: 120px;
+  width: 80px;  /* Increased size for bee2 */
+  height: 80px;
   z-index: 100;
   pointer-events: auto; /* Allow hover detection */
   top: 0;
@@ -1800,10 +1843,10 @@ footer {
 .journey-split-layout {
   width: 100%;
   max-width: 1200px;
-  height: 70vh;
-  min-height: 500px;
+  min-height: 70vh; /* Changed from height: 70vh to allow growth on zoom */
+  height: auto;
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 280px 1fr; /* Slightly narrowed left nav */
   gap: 40px;
   padding: 40px;
   background: rgba(255, 255, 255, 0.03);
@@ -1812,6 +1855,7 @@ footer {
   border-radius: 40px;
   box-shadow: none;
   position: relative;
+  margin-bottom: 40px;
 }
 
 .journey-left-nav {
@@ -1915,11 +1959,12 @@ footer {
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center; /* Center content vertically */
   opacity: 0;
   visibility: hidden;
   will-change: opacity, transform;
   padding: 20px;
-  pointer-events: none; /* Prevent clicking hidden slides */
+  pointer-events: none;
   z-index: 1;
 }
 
@@ -1933,13 +1978,14 @@ footer {
 
 .j-img-wrapper {
   width: 100%;
-  flex: 1;
-  min-height: 0; 
+  max-width: 500px; /* Closer to square footprint */
+  aspect-ratio: 1 / 1; /* Explicitly square as requested */
+  margin: 0 auto;
   border-radius: 40px;
   overflow: hidden;
   position: relative;
   background: rgba(255, 255, 255, 0.03);
-  padding: 0;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
 }
 
 .j-img-wrapper img {
@@ -3004,6 +3050,7 @@ footer {
   padding: 1.5px;
   background: linear-gradient(135deg, var(--accent-1), var(--accent-3), var(--accent-2));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
@@ -3314,6 +3361,7 @@ footer {
   margin-bottom: 50px;
   background: linear-gradient(to right, #fff, #888);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 800;
 }
