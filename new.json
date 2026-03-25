@@ -1,0 +1,7 @@
+
+for(let i=0;i<2000;i++)
+{
+curl -X POST "https://ojaswi-bhardwaj.vercel.app/api/visitors" \
+  -H "Content-Type: application/json" \
+  -d '{"visitorId":"5529df61-5ebe-4854-be1b-0d186c4"+i}'
+}
